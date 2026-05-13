@@ -17,9 +17,24 @@ object DateUtils {
         if (!event.targetDate.isBefore(today)) return event.targetDate
 
         if (event.isLunar && event.repeatInterval == "YEARLY") {
-            // 农历每年重复处理
-            val targetLunarMonth = event.lunarMonth ?: Lunar.fromYmd(event.targetDate.year, event.targetDate.monthValue, event.targetDate.dayOfMonth).month
-            val targetLunarDay = event.lunarDay ?: Lunar.fromYmd(event.targetDate.year, event.targetDate.monthValue, event.targetDate.dayOfMonth).day
+            // 【修复核心】提取目标农历月和日
+            val targetLunarMonth: Int
+            val targetLunarDay: Int
+
+            if (event.lunarMonth != null && event.lunarDay != null) {
+                // 1. 如果是直接指定月日的，直接使用数据库里的值
+                targetLunarMonth = event.lunarMonth
+                targetLunarDay = event.lunarDay
+            } else {
+                // 2. 如果是年份推算的，先将公历的 targetDate 转为 Solar 对象，再获取对应的真实农历月日
+                val solarOfTarget = Solar.fromYmd(
+                    event.targetDate.year,
+                    event.targetDate.monthValue,
+                    event.targetDate.dayOfMonth
+                )
+                targetLunarMonth = solarOfTarget.lunar.month
+                targetLunarDay = solarOfTarget.lunar.day
+            }
 
             // 构造今年的该农历日期
             val lunarThisYear = Lunar.fromYmd(today.year, targetLunarMonth, targetLunarDay)
