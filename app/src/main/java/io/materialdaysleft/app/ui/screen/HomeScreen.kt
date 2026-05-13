@@ -28,6 +28,7 @@ import kotlin.math.abs
 /**
  * 带有状态的 HomeScreen 入口，负责与 ViewModel 交互
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: CountdownViewModel,
@@ -37,11 +38,23 @@ fun HomeScreen(
     // collectAsState 会监听 Flow 的变化并触发 Compose 自动重组 (Recomposition)
     val events by viewModel.allEvents.collectAsState()
 
-    HomeScreenContent(
-        events = events,
-        onEventClick = onNavigateToEdit,
-        modifier = modifier
-    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("质感倒数日") }, // 应用中文名
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                )
+            )
+        }
+    ) { paddingValues ->
+        HomeScreenContent(
+            events = events,
+            onEventClick = onNavigateToEdit,
+            modifier = modifier.padding(paddingValues) // 使用 Scaffold 提供的 padding
+        )
+    }
 }
 
 /**

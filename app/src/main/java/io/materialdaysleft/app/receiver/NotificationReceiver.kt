@@ -8,6 +8,11 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.materialdaysleft.app.R
+import io.materialdaysleft.app.data.local.AppDatabase
+import io.materialdaysleft.app.util.AlarmScheduler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NotificationReceiver : BroadcastReceiver() {
 
@@ -25,37 +30,40 @@ class NotificationReceiver : BroadcastReceiver() {
 
         if (eventId == -1L) return
 
+        // 1. 发送通知
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // 创建通知渠道 (Android 8.0+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "倒数日提醒",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "用于发送即将到来的倒数日通知"
-            }
+            val channel = NotificationChannel(CHANNEL_ID, "倒数日提醒", NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
         }
 
-        // 构建通知文案
-        val contentText = if (daysLeft == 0) {
-            "就是今天！"
-        } else {
-            "距离目标还有 $daysLeft 天"
-        }
-
-        // 构建并发送通知
+        val contentText = if (daysLeft == 0) "就是今天！" else "距离目标还有 $daysLeft 天"
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // 替换为您的应用图标
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
-
-        // 使用 eventId 作为通知的 unique ID，防止被相互覆盖
         notificationManager.notify(eventId.toInt(), notification)
+
+        // 2. 【修复核心】：闭环机制，安排下一次提醒
+        // 使用 goAsync() 告诉系统该广播还需要在后台做些耗时操作（查询数据库）
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val db = AppDatabase.getDatabase(context)
+                val event = db.countdownEventDao.getEventById(eventId)
+
+                // 如果事件存在且开启了重复，立刻为它安排下一个周期的闹钟
+                if (event != null && event.isRepeatEnabled) {
+                    val alarmScheduler = AlarmScheduler(context)
+                    alarmScheduler.scheduleAlarm(event)
+                }
+            } finally {
+                // 必须调用 finish 释放系统资源
+                pendingResult.finish()
+            }
+        }
     }
 }

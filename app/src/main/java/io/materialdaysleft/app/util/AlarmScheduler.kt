@@ -21,20 +21,28 @@ class AlarmScheduler(private val context: Context) {
     fun scheduleAlarm(event: CountdownEventEntity) {
         cancelAlarm(event) // 设定前先清除旧的
 
-        // 计算目标提醒日期：目标日期 - 提前通知的天数
         val targetDate = DateUtils.calculateNextOccurrence(event)
         val notifyDate = targetDate.minusDays(event.notifyDaysInAdvance.toLong())
 
-        // 结合用户设定的具体时间（小时和分钟）
-        val triggerTime = notifyDate.atTime(event.notifyTimeHour, event.notifyTimeMinute)
+        var triggerTime = notifyDate.atTime(event.notifyTimeHour, event.notifyTimeMinute)
             .atZone(ZoneId.systemDefault())
 
-        // 如果计算出的精确提醒时间已经过去，就不再设闹钟了
-        if (triggerTime.isBefore(ZonedDateTime.now())) return
+        // 【关键修复】：如果算出的触发时间已经过去（例如今天9点已过），且是重复事件，则顺延到下一个周期
+        if (triggerTime.isBefore(ZonedDateTime.now())) {
+            if (event.isRepeatEnabled) {
+                when (event.repeatInterval) {
+                    "DAILY" -> triggerTime = triggerTime.plusDays(1)
+                    "WEEKLY" -> triggerTime = triggerTime.plusWeeks(1)
+                    "MONTHLY" -> triggerTime = triggerTime.plusMonths(1)
+                    "YEARLY" -> triggerTime = triggerTime.plusYears(1)
+                }
+            } else {
+                return // 非重复事件，过去就直接抛弃
+            }
+        }
 
         val triggerTimeMillis = triggerTime.toInstant().toEpochMilli()
 
-        // 准备传递给 Receiver 的数据
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra(NotificationReceiver.EXTRA_EVENT_ID, event.id)
             putExtra(NotificationReceiver.EXTRA_TITLE, event.title)
@@ -43,20 +51,14 @@ class AlarmScheduler(private val context: Context) {
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            event.id.toInt(), // 使用 event.id 作为 RequestCode，确保可以唯一标识和取消
+            event.id.toInt(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 使用精准闹钟，允许在打盹模式(Doze)下唤醒
         try {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMillis, pendingIntent)
         } catch (e: SecurityException) {
-            // Android 14+ 如果用户手动在系统设置剥夺了闹钟权限会抛出异常，这里安全捕获
             e.printStackTrace()
         }
     }

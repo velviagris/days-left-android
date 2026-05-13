@@ -82,12 +82,11 @@ fun MainScreen(viewModel: CountdownViewModel) {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
                     viewModel = viewModel,
-                    // 当首页卡片被点击时，更新 editingEventId 以弹出编辑半屏
                     onNavigateToEdit = { eventId ->
                         editingEventId = eventId
                     }
