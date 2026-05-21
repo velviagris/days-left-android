@@ -46,6 +46,7 @@ fun CreateBottomSheet(
     var notifyTimeHour by remember { mutableStateOf(9) }     // 新增：默认 9 点
     var notifyTimeMinute by remember { mutableStateOf(0) }   // 新增：默认 0 分
     var syncToSystemCalendar by remember { mutableStateOf(false) }
+    var useCalendarNotification by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -76,7 +77,9 @@ fun CreateBottomSheet(
                             notifyDaysInAdvance = notifyDaysInAdvance.toInt(),
                             notifyTimeHour = notifyTimeHour,       // 存入数据库
                             notifyTimeMinute = notifyTimeMinute,   // 存入数据库
-                            syncToSystemCalendar = syncToSystemCalendar, calendarEventId = null
+                            syncToSystemCalendar = syncToSystemCalendar,
+                            useCalendarNotification = useCalendarNotification,
+                            calendarEventId = null
                         ))
                         onDismiss()
                     },
@@ -96,7 +99,8 @@ fun CreateBottomSheet(
                 notifyDaysInAdvance = notifyDaysInAdvance, onNotifyDaysChange = { notifyDaysInAdvance = it },
                 notifyTimeHour = notifyTimeHour, onNotifyTimeHourChange = { notifyTimeHour = it },
                 notifyTimeMinute = notifyTimeMinute, onNotifyTimeMinuteChange = { notifyTimeMinute = it },
-                syncToSystemCalendar = syncToSystemCalendar, onSyncChange = { syncToSystemCalendar = it }
+                syncToSystemCalendar = syncToSystemCalendar, onSyncChange = { syncToSystemCalendar = it },
+                useCalendarNotification = useCalendarNotification, onUseCalendarNotificationChange = { useCalendarNotification = it }
             )
         }
     }

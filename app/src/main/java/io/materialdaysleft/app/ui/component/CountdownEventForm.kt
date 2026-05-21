@@ -40,6 +40,7 @@ fun CountdownEventForm(
     notifyTimeHour: Int, onNotifyTimeHourChange: (Int) -> Unit,
     notifyTimeMinute: Int, onNotifyTimeMinuteChange: (Int) -> Unit,
     syncToSystemCalendar: Boolean, onSyncChange: (Boolean) -> Unit,
+    useCalendarNotification: Boolean, onUseCalendarNotificationChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -146,6 +147,14 @@ fun CountdownEventForm(
             headlineContent = { Text("同步到系统日历") },
             trailingContent = { Switch(checked = syncToSystemCalendar, onCheckedChange = onSyncChange) }
         )
+
+        if (syncToSystemCalendar) {
+            ListItem(
+                headlineContent = { Text("开启日历事件提醒") },
+                supportingContent = { Text("在系统日历中设置提醒") },
+                trailingContent = { Switch(checked = useCalendarNotification, onCheckedChange = onUseCalendarNotificationChange) }
+            )
+        }
         Spacer(modifier = Modifier.height(24.dp))
     }
 
@@ -235,7 +244,8 @@ fun FormPreview() {
             notifyDaysInAdvance = 5f, onNotifyDaysChange = {},
             notifyTimeHour = 9, onNotifyTimeHourChange = {},
             notifyTimeMinute = 30, onNotifyTimeMinuteChange = {},
-            syncToSystemCalendar = false, onSyncChange = {}
+            syncToSystemCalendar = false, onSyncChange = {},
+            useCalendarNotification = false, onUseCalendarNotificationChange = {}
         )
     }
 }

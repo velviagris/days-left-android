@@ -40,6 +40,7 @@ fun EditBottomSheet(
         var notifyTimeHour by remember { mutableStateOf(original.notifyTimeHour) }     // 从数据库回显
         var notifyTimeMinute by remember { mutableStateOf(original.notifyTimeMinute) } // 从数据库回显
         var syncToSystemCalendar by remember { mutableStateOf(original.syncToSystemCalendar) }
+        var useCalendarNotification by remember { mutableStateOf(original.useCalendarNotification) }
 
         ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
             Column {
@@ -68,7 +69,8 @@ fun EditBottomSheet(
                             notifyDaysInAdvance = notifyDaysInAdvance.toInt(),
                             notifyTimeHour = notifyTimeHour,       // 更新并保存
                             notifyTimeMinute = notifyTimeMinute,   // 更新并保存
-                            syncToSystemCalendar = syncToSystemCalendar
+                            syncToSystemCalendar = syncToSystemCalendar,
+                            useCalendarNotification = useCalendarNotification
                         ))
                         onDismiss()
                     }) { Text("更新") }
@@ -98,7 +100,9 @@ fun EditBottomSheet(
                     notifyTimeMinute = notifyTimeMinute,
                     onNotifyTimeMinuteChange = { notifyTimeMinute = it },
                     syncToSystemCalendar = syncToSystemCalendar,
-                    onSyncChange = { syncToSystemCalendar = it }
+                    onSyncChange = { syncToSystemCalendar = it },
+                    useCalendarNotification = useCalendarNotification,
+                    onUseCalendarNotificationChange = { useCalendarNotification = it }
                 )
             }
         }

@@ -17,17 +17,28 @@ class AlarmScheduler(private val context: Context) {
 
     /**
      * 为倒数日设定精确的系统唤醒提醒
+     * 支持同时设定“提前提醒”和“当日提醒”
      */
     fun scheduleAlarm(event: CountdownEventEntity) {
         cancelAlarm(event) // 设定前先清除旧的
 
         val targetDate = DateUtils.calculateNextOccurrence(event)
-        val notifyDate = targetDate.minusDays(event.notifyDaysInAdvance.toLong())
 
+        // 1. 设定“提前提醒”闹钟 (使用原始 ID 作为 requestCode)
+        if (event.notifyDaysInAdvance > 0) {
+            val notifyDate = targetDate.minusDays(event.notifyDaysInAdvance.toLong())
+            scheduleSingleAlarm(event, notifyDate, event.notifyDaysInAdvance, event.id.toInt())
+        }
+
+        // 2. 设定“当日提醒”闹钟 (使用 ID + 100000 作为 requestCode 以示区分)
+        scheduleSingleAlarm(event, targetDate, 0, event.id.toInt() + 100000)
+    }
+
+    private fun scheduleSingleAlarm(event: CountdownEventEntity, notifyDate: LocalDate, daysLeft: Int, requestCode: Int) {
         var triggerTime = notifyDate.atTime(event.notifyTimeHour, event.notifyTimeMinute)
             .atZone(ZoneId.systemDefault())
 
-        // 【关键修复】：如果算出的触发时间已经过去（例如今天9点已过），且是重复事件，则顺延到下一个周期
+        // 如果算出的触发时间已经过去，且是重复事件，则顺延到下一个周期
         if (triggerTime.isBefore(ZonedDateTime.now())) {
             if (event.isRepeatEnabled) {
                 when (event.repeatInterval) {
@@ -46,12 +57,12 @@ class AlarmScheduler(private val context: Context) {
         val intent = Intent(context, NotificationReceiver::class.java).apply {
             putExtra(NotificationReceiver.EXTRA_EVENT_ID, event.id)
             putExtra(NotificationReceiver.EXTRA_TITLE, event.title)
-            putExtra(NotificationReceiver.EXTRA_DAYS_LEFT, event.notifyDaysInAdvance)
+            putExtra(NotificationReceiver.EXTRA_DAYS_LEFT, daysLeft)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            event.id.toInt(),
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -64,16 +75,27 @@ class AlarmScheduler(private val context: Context) {
     }
 
     /**
-     * 取消已存在的闹钟
+     * 取消已存在的闹钟（包括提前提醒和当日提醒）
      */
     fun cancelAlarm(event: CountdownEventEntity) {
         val intent = Intent(context, NotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
+        
+        // 取消提前提醒
+        val pendingIntentAdvance = PendingIntent.getBroadcast(
             context,
             event.id.toInt(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        alarmManager.cancel(pendingIntent)
+        alarmManager.cancel(pendingIntentAdvance)
+
+        // 取消当日提醒
+        val pendingIntentToday = PendingIntent.getBroadcast(
+            context,
+            event.id.toInt() + 100000,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntentToday)
     }
 }

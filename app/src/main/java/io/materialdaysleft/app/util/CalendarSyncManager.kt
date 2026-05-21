@@ -25,23 +25,35 @@ class CalendarSyncManager(private val context: Context) {
 
         val calId = getPrimaryCalendarId() ?: return null
 
-        // 将 LocalDate 转换为 UTC 毫秒时间戳 (全天事件需要基于 UTC)
-        val startMillis = event.targetDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
-        val endMillis = startMillis + 24 * 60 * 60 * 1000 // 加一天
-
         val values = ContentValues().apply {
-            put(CalendarContract.Events.DTSTART, startMillis)
-            put(CalendarContract.Events.DTEND, endMillis)
             put(CalendarContract.Events.TITLE, "倒数日: ${event.title}")
             put(CalendarContract.Events.DESCRIPTION, "由 Material DaysLeft 自动生成")
             put(CalendarContract.Events.CALENDAR_ID, calId)
-            put(CalendarContract.Events.EVENT_TIMEZONE, "UTC") // 全天事件必须设为 UTC
-            put(CalendarContract.Events.ALL_DAY, 1) // 标记为全天事件
+
+            // 恢复为全天事件
+            val startMillis = event.targetDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+            val endMillis = startMillis + 24 * 60 * 60 * 1000
+            put(CalendarContract.Events.DTSTART, startMillis)
+            put(CalendarContract.Events.DTEND, endMillis)
+            put(CalendarContract.Events.EVENT_TIMEZONE, "UTC")
+            put(CalendarContract.Events.ALL_DAY, 1)
         }
 
         // 插入事件并获取 URI
         val uri = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
-        return uri?.lastPathSegment?.toLongOrNull()
+        val eventId = uri?.lastPathSegment?.toLongOrNull()
+
+        // 如果开启了日历通知，则添加系统默认的提醒
+        if (eventId != null && event.useCalendarNotification) {
+            val reminderValues = ContentValues().apply {
+                put(CalendarContract.Reminders.MINUTES, 0) // 准时（对于全天事件通常是当天 0 点或系统设定值）
+                put(CalendarContract.Reminders.EVENT_ID, eventId)
+                put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT)
+            }
+            context.contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
+        }
+
+        return eventId
     }
 
     /**
