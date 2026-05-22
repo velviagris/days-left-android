@@ -21,6 +21,26 @@ class NotificationReceiver : BroadcastReceiver() {
         const val EXTRA_EVENT_ID = "extra_event_id"
         const val EXTRA_TITLE = "extra_title"
         const val EXTRA_DAYS_LEFT = "extra_days_left"
+
+        /**
+         * 发送一个测试通知
+         */
+        fun sendTestNotification(context: Context) {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(CHANNEL_ID, "倒数日提醒", NotificationManager.IMPORTANCE_HIGH)
+                notificationManager.createNotificationChannel(channel)
+            }
+
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle("这是一条测试通知")
+                .setContentText("如果您能看到这条消息，说明通知功能运行正常。")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .build()
+            notificationManager.notify(999, notification)
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -39,7 +59,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         val contentText = if (daysLeft == 0) "就是今天！" else "距离目标还有 $daysLeft 天"
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

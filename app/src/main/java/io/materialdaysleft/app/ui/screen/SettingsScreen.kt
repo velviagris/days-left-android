@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.gson.reflect.TypeToken
 import io.materialdaysleft.app.data.local.CountdownEventEntity
+import io.materialdaysleft.app.receiver.NotificationReceiver
 import io.materialdaysleft.app.ui.viewmodel.CountdownViewModel
 import io.materialdaysleft.app.util.BackupUtils
 import kotlinx.coroutines.Dispatchers
@@ -179,6 +181,18 @@ fun SettingsScreen(
                     }
                 }
             )
+
+            // 发送测试通知按钮
+            if (hasNotificationPermission) {
+                ListItem(
+                    headlineContent = { Text("发送测试通知", color = MaterialTheme.colorScheme.primary) },
+                    supportingContent = { Text("点击测试通知功能是否正常") },
+                    leadingContent = { Icon(Icons.Filled.Build, contentDescription = null) },
+                    modifier = Modifier.clickable {
+                        NotificationReceiver.sendTestNotification(context)
+                    }
+                )
+            }
 
             // 日历权限入口
             ListItem(
