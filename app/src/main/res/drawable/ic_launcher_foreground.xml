@@ -14,22 +14,18 @@
         android:translateX="0"
         android:translateY="3">
 
-        <!-- 皇冠轮廓 (基于之前的 960 坐标等比例缩放至约 108 范围) -->
+        <!-- 1. 皇冠填充层：填充白色，并利用 evenOdd 将眼睛区域挖空（透明） -->
         <path
-            android:strokeColor="#FFFFFF"
+            android:fillColor="#FFA726"
+            android:fillType="evenOdd"
+            android:pathData="M20,78 L88,78 L98,30 L78,48 L54,18 L30,48 L10,30 Z M40,62 A4.5,4.5 0 1,1 39.9,62 Z M68,62 A4.5,4.5 0 1,1 67.9,62 Z" />
+
+        <!-- 2. 皇冠轮廓层：仅做白色描边，提供边缘质感 -->
+        <path
+            android:strokeColor="#FFA726"
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
             android:pathData="M20,78 L88,78 L98,30 L78,48 L54,18 L30,48 L10,30 Z" />
-
-        <!-- 眼睛：左眼 -->
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M40,62 A4.5,4.5 0 1,1 39.9,62" />
-
-        <!-- 眼睛：右眼 -->
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M68,62 A4.5,4.5 0 1,1 67.9,62" />
     </group>
 </vector>
