@@ -72,4 +72,20 @@ object DateUtils {
         val lunar = solar.lunar
         return "${lunar.monthInChinese}月${lunar.dayInChinese}"
     }
+
+    /**
+     * 获取农历月份描述，如 "正月", "十二月"
+     */
+    fun getLunarMonth(date: LocalDate): String {
+        val solar = Solar.fromYmd(date.year, date.monthValue, date.dayOfMonth)
+        return "${solar.lunar.monthInChinese}月"
+    }
+
+    /**
+     * 获取农历日描述，如 "初一", "三十"
+     */
+    fun getLunarDay(date: LocalDate): String {
+        val solar = Solar.fromYmd(date.year, date.monthValue, date.dayOfMonth)
+        return solar.lunar.dayInChinese
+    }
 }
