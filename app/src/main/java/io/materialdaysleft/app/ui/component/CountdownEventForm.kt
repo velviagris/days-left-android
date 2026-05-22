@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import io.materialdaysleft.app.ui.screen.LUNAR_DAYS
 import io.materialdaysleft.app.ui.screen.LUNAR_MONTHS
 import io.materialdaysleft.app.ui.theme.MaterialDaysLeftTheme
+import io.materialdaysleft.app.util.DateUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -102,13 +103,23 @@ fun CountdownEventForm(
                 LunarDropdown(label = "农历日", options = LUNAR_DAYS, selectedIndex = lunarDay - 1, onSelect = { onLunarDayChange(it + 1) }, modifier = Modifier.weight(1f))
             }
         } else {
+            val solarDateStr = targetDate.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
+            val displayText = if (isLunar) {
+                "$solarDateStr (农历 ${DateUtils.getLunarDescription(targetDate)})"
+            } else {
+                solarDateStr
+            }
             OutlinedTextField(
-                value = targetDate.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")),
+                value = displayText,
                 onValueChange = {}, label = { Text(if (isLunar) "原始公历日期" else "目标日期") },
                 readOnly = true, trailingIcon = { Icon(Icons.Default.DateRange, null) },
                 modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true },
                 enabled = false,
-                colors = OutlinedTextFieldDefaults.colors(disabledTextColor = MaterialTheme.colorScheme.onSurface, disabledBorderColor = MaterialTheme.colorScheme.outline, disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         }
 
@@ -165,8 +176,35 @@ fun CountdownEventForm(
             confirmButton = { TextButton(onClick = {
                 datePickerState.selectedDateMillis?.let { onTargetDateChange(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
                 showDatePicker = false
-            }) { Text("确定") } }
-        ) { DatePicker(state = datePickerState) }
+            }) { Text("确定") } },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("取消") } }
+        ) {
+            if (isLunar) {
+                DatePicker(
+                    state = datePickerState,
+                    headline = {
+                        val selectedDateMillis = datePickerState.selectedDateMillis
+                        Column(modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp)) {
+                            DatePickerDefaults.DatePickerHeadline(
+                                selectedDateMillis = datePickerState.selectedDateMillis,
+                                displayMode = datePickerState.displayMode,
+                                dateFormatter = DatePickerDefaults.dateFormatter()
+                            )
+                            if (selectedDateMillis != null) {
+                                val date = Instant.ofEpochMilli(selectedDateMillis).atZone(ZoneOffset.UTC).toLocalDate()
+                                Text(
+                                    text = "农历 ${DateUtils.getLunarDescription(date)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
+                    }
+                )
+            } else {
+                DatePicker(state = datePickerState)
+            }
+        }
     }
 
     // 时间选择器 Dialog

@@ -63,4 +63,13 @@ object DateUtils {
             return nextDate
         }
     }
+
+    /**
+     * 获取日期的农历描述，例如 "十月初一"
+     */
+    fun getLunarDescription(date: LocalDate): String {
+        val solar = Solar.fromYmd(date.year, date.monthValue, date.dayOfMonth)
+        val lunar = solar.lunar
+        return "${lunar.monthInChinese}月${lunar.dayInChinese}"
+    }
 }
