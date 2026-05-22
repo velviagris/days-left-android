@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
+import io.materialdaysleft.app.R
 import io.materialdaysleft.app.data.local.CountdownEventEntity
 import java.time.ZoneId
 import java.util.TimeZone
@@ -26,8 +27,8 @@ class CalendarSyncManager(private val context: Context) {
         val calId = getPrimaryCalendarId() ?: return null
 
         val values = ContentValues().apply {
-            put(CalendarContract.Events.TITLE, "倒数日: ${event.title}")
-            put(CalendarContract.Events.DESCRIPTION, "由 Material DaysLeft 自动生成")
+            put(CalendarContract.Events.TITLE, context.getString(R.string.calendar_event_prefix, event.title))
+            put(CalendarContract.Events.DESCRIPTION, context.getString(R.string.calendar_event_desc))
             put(CalendarContract.Events.CALENDAR_ID, calId)
 
             // 恢复为全天事件

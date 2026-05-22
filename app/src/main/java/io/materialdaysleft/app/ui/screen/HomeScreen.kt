@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import io.materialdaysleft.app.R
 import io.materialdaysleft.app.data.local.CountdownEventEntity
 import io.materialdaysleft.app.ui.theme.MaterialDaysLeftTheme
 import io.materialdaysleft.app.ui.viewmodel.CountdownViewModel
@@ -41,7 +43,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("质感倒数日") }, // 应用中文名
+                title = { Text(stringResource(R.string.app_name)) }, // 应用中文名
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -73,7 +75,7 @@ fun HomeScreenContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "暂无倒数日\n点击右下角 + 号添加吧！",
+                text = stringResource(R.string.empty_list_hint),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -152,13 +154,13 @@ fun CountdownEventCard(event: CountdownEventEntity,onClick: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                val dateFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
+                val dateFormatter = DateTimeFormatter.ofPattern(stringResource(R.string.date_format_full))
                 Text(event.targetDate.format(dateFormatter), style = MaterialTheme.typography.bodyMedium)
 
                 // 如果已过且开启了重复，提示下一次的日期
                 if (isPast && event.isRepeatEnabled) {
                     Text(
-                        text = "下次: ${nextDate.format(dateFormatter)}",
+                        text = stringResource(R.string.next_occurrence_label, nextDate.format(dateFormatter)),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -169,20 +171,20 @@ fun CountdownEventCard(event: CountdownEventEntity,onClick: () -> Unit) {
                 // 标签展示区 (Tags)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (event.isLunar) {
-                        EventTag(text = "农历")
+                        EventTag(text = stringResource(R.string.lunar_label))
                     }
                     if (event.isRepeatEnabled) {
                         val intervalText = when (event.repeatInterval) {
-                            "DAILY" -> "每天"
-                            "WEEKLY" -> "每周"
-                            "MONTHLY" -> "每月"
-                            "YEARLY" -> "每年"
-                            else -> "重复"
+                            "DAILY" -> stringResource(R.string.daily)
+                            "WEEKLY" -> stringResource(R.string.weekly)
+                            "MONTHLY" -> stringResource(R.string.monthly)
+                            "YEARLY" -> stringResource(R.string.yearly)
+                            else -> stringResource(R.string.repeat)
                         }
                         EventTag(text = intervalText)
                     }
                     if (event.syncToSystemCalendar) {
-                        EventTag(text = "系统日历")
+                        EventTag(text = stringResource(R.string.system_calendar))
                     }
                 }
             }
@@ -195,11 +197,11 @@ fun CountdownEventCard(event: CountdownEventEntity,onClick: () -> Unit) {
                 if (isPast && event.isRepeatEnabled) {
                     // 如果已过但有重复循环，展示距离下一次的天数
                     Text("${nextDaysDiff}", style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Black)
-                    Text("距下次还有", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.days_until_next), style = MaterialTheme.typography.labelLarge)
                 } else {
                     // 常规显示
-                    Text(if (initialDaysDiff == 0L) "今天" else absDays.toString(), style = MaterialTheme.typography.displayMedium)
-                    Text(if (isPast) "已过天数" else "剩余天数", style = MaterialTheme.typography.labelLarge)
+                    Text(if (initialDaysDiff == 0L) stringResource(R.string.today_label) else absDays.toString(), style = MaterialTheme.typography.displayMedium)
+                    Text(if (isPast) stringResource(R.string.days_past) else stringResource(R.string.days_remaining), style = MaterialTheme.typography.labelLarge)
                 }
             }
         }

@@ -1,0 +1,95 @@
+<resources>
+    <string name="app_name">質感倒數日</string>
+    <string name="empty_list_hint">暫無倒數日\n點擊右下角 + 號添加吧！</string>
+    <string name="next_occurrence_label">下次: %s</string>
+    <string name="lunar_label">農曆</string>
+    <string name="daily">每天</string>
+    <string name="weekly">每週</string>
+    <string name="monthly">每月</string>
+    <string name="yearly">每年</string>
+    <string name="repeat">重複</string>
+    <string name="system_calendar">系統日曆</string>
+    <string name="today_label">今天</string>
+    <string name="days_until_next">距下次還有</string>
+    <string name="days_past">已過天數</string>
+    <string name="days_remaining">剩餘天數</string>
+
+    <string name="settings">設定</string>
+    <string name="system_permissions">系統權限</string>
+    <string name="notification_permission">通知與提醒權限</string>
+    <string name="permission_granted">已授權，可以正常接收倒數日提醒</string>
+    <string name="permission_denied">未授權，點擊申請權限</string>
+    <string name="notification_permission_ready">通知權限已配置妥當</string>
+    <string name="notification_permission_granted">已獲得通知權限</string>
+    <string name="notification_permission_refused">已拒絕通知權限，倒數日提醒將無法工作</string>
+
+    <string name="calendar_sync_permission">系統日曆同步權限</string>
+    <string name="calendar_permission_granted_hint">已授權，可以自動將倒數日寫入日曆</string>
+    <string name="calendar_permission_denied_hint">未授權，點擊申請日曆讀寫權限</string>
+    <string name="calendar_permission_ready">日曆權限已配置妥當</string>
+    <string name="calendar_permission_granted_toast">已獲得系統日曆讀寫權限</string>
+    <string name="calendar_permission_refused_toast">已拒絕日曆權限，將無法自動同步日程</string>
+
+    <string name="test_notification">發送測試通知</string>
+    <string name="test_notification_desc">點擊測試通知功能是否正常</string>
+    <string name="test_notification_title">這是一條測試通知</string>
+    <string name="test_notification_content">如果您能看到這條消息，說明通知功能運行正常。</string>
+
+    <string name="data_backup_restore">資料備份與復原</string>
+    <string name="export_backup">匯出備份</string>
+    <string name="export_backup_desc">將所有倒數日儲存為 JSON 檔案</string>
+    <string name="export_success">備份匯出成功！</string>
+    <string name="export_failed">匯出失敗: %s</string>
+    <string name="import_restore">匯入復原</string>
+    <string name="import_restore_desc">從本地的 JSON 檔案中合併資料</string>
+    <string name="import_success">成功復原 %d 條記錄！</string>
+    <string name="import_failed">匯入失敗，檔案格式可能不正確</string>
+
+    <string name="add_event">添加倒數日</string>
+    <string name="edit_details">編輯詳情</string>
+    <string name="save">儲存</string>
+    <string name="update">更新</string>
+    <string name="delete">刪除</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">確定</string>
+    <string name="delete_confirm_title">刪除確認</string>
+    <string name="delete_confirm_msg">確定要刪除此倒數日嗎？</string>
+
+    <string name="event_title_label">倒數日標題</string>
+    <string name="event_title_placeholder">例如：跨年夜、父母生日</string>
+    <string name="solar">公曆</string>
+    <string name="lunar">農曆</string>
+    <string name="by_year">年份推算</string>
+    <string name="by_month_day">指定月日</string>
+    <string name="lunar_month_label">農曆月</string>
+    <string name="lunar_day_label">農曆日</string>
+    <string name="original_solar_date">原始公曆日期</string>
+    <string name="target_date">目標日期</string>
+    <string name="enable_repeat">開啟重複提醒</string>
+    <string name="repeat_interval">重複頻率</string>
+    <string name="days_in_advance">提前提醒天数: %d 天</string>
+    <string name="notify_time">通知時間</string>
+    <string name="notify_time_desc">到達提醒日時，將在该時間發送通知</string>
+    <string name="sync_to_calendar">同步到系統日曆</string>
+    <string name="enable_calendar_notify">開啟日曆事件提醒</string>
+    <string name="calendar_notify_desc">在系統日曆中設定提醒</string>
+
+    <string name="select_date">選擇日期</string>
+    <string name="solar_date_label">公曆日期</string>
+    <string name="input_date_label">輸入日期</string>
+    <string name="input_date_placeholder">yyyy/MM/dd</string>
+    <string name="lunar_convert">轉換農曆</string>
+    <string name="lunar_prefix">農曆 %s</string>
+
+    <string name="notification_channel_name">倒數日提醒</string>
+    <string name="notification_default_title">您的倒数日</string>
+    <string name="notification_today">就是今天！</string>
+    <string name="notification_days_left">距離目標還有 %d 天</string>
+    <string name="calendar_event_prefix">倒數日: %s</string>
+    <string name="calendar_event_desc">由 Material DaysLeft 自動產生</string>
+    <string name="date_format_full">yyyy年MM月dd日</string>
+    <string name="date_format_picker_headline">yyyy年M月d日</string>
+    <string name="lunar_month_suffix">月</string>
+    <string name="nav_home">首頁</string>
+    <string name="nav_settings">設定</string>
+</resources>

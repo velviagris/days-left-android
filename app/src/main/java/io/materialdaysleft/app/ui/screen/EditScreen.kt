@@ -9,6 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import io.materialdaysleft.app.R
 import io.materialdaysleft.app.ui.viewmodel.CountdownViewModel
 import java.time.LocalDate
 
@@ -22,6 +25,9 @@ fun EditBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var eventToEdit by remember { mutableStateOf<io.materialdaysleft.app.data.local.CountdownEventEntity?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    
+    val lunarMonths = stringArrayResource(R.array.lunar_months)
+    val lunarDays = stringArrayResource(R.array.lunar_days)
 
     LaunchedEffect(eventId) {
         eventToEdit = viewModel.getEventById(eventId)
@@ -52,7 +58,7 @@ fun EditBottomSheet(
                     IconButton(onClick = { showDeleteConfirm = true }) {
                         Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colorScheme.error)
                     }
-                    Text("编辑详情", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.edit_details), style = MaterialTheme.typography.titleLarge)
                     TextButton(onClick = {
                         val baseDate = if (isLunar && isLunarWithoutYear) {
                             val solar = com.nlf.calendar.Lunar.fromYmd(LocalDate.now().year, lunarMonth, lunarDay).solar
@@ -73,7 +79,7 @@ fun EditBottomSheet(
                             useCalendarNotification = useCalendarNotification
                         ))
                         onDismiss()
-                    }) { Text("更新") }
+                    }) { Text(stringResource(R.string.update)) }
                 }
 
                 _root_ide_package_.io.materialdaysleft.app.ui.component.CountdownEventForm(
@@ -102,7 +108,9 @@ fun EditBottomSheet(
                     syncToSystemCalendar = syncToSystemCalendar,
                     onSyncChange = { syncToSystemCalendar = it },
                     useCalendarNotification = useCalendarNotification,
-                    onUseCalendarNotificationChange = { useCalendarNotification = it }
+                    onUseCalendarNotificationChange = { useCalendarNotification = it },
+                    lunarMonths = lunarMonths,
+                    lunarDays = lunarDays
                 )
             }
         }
@@ -110,10 +118,10 @@ fun EditBottomSheet(
         if (showDeleteConfirm) {
             AlertDialog(
                 onDismissRequest = { showDeleteConfirm = false },
-                title = { Text("删除确认") },
-                text = { Text("确定要删除此倒数日吗？") },
-                confirmButton = { TextButton(onClick = { viewModel.deleteEvent(original); onDismiss() }) { Text("删除", color = MaterialTheme.colorScheme.error) } },
-                dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") } }
+                title = { Text(stringResource(R.string.delete_confirm_title)) },
+                text = { Text(stringResource(R.string.delete_confirm_msg)) },
+                confirmButton = { TextButton(onClick = { viewModel.deleteEvent(original); onDismiss() }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) } },
+                dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.cancel)) } }
             )
         }
     }

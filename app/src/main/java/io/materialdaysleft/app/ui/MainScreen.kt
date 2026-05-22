@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -47,9 +48,9 @@ fun MainScreen(viewModel: CountdownViewModel) {
                     val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     NavigationBarItem(
                         icon = {
-                            screen.icon?.let { Icon(it, contentDescription = screen.title) }
+                            screen.icon?.let { Icon(it, contentDescription = stringResource(screen.titleResId)) }
                         },
-                        label = { Text(screen.title) },
+                        label = { Text(stringResource(screen.titleResId)) },
                         selected = isSelected,
                         onClick = {
                             navController.navigate(screen.route) {
@@ -73,7 +74,7 @@ fun MainScreen(viewModel: CountdownViewModel) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add Event")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(io.materialdaysleft.app.R.string.add_event))
                 }
             }
         }

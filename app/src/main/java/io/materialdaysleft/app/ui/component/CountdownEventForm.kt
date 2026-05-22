@@ -30,8 +30,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.materialdaysleft.app.ui.screen.LUNAR_DAYS
-import io.materialdaysleft.app.ui.screen.LUNAR_MONTHS
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import io.materialdaysleft.app.R
 import io.materialdaysleft.app.ui.theme.MaterialDaysLeftTheme
 import io.materialdaysleft.app.util.DateUtils
 import java.time.Instant
@@ -59,6 +60,8 @@ fun CountdownEventForm(
     notifyTimeMinute: Int, onNotifyTimeMinuteChange: (Int) -> Unit,
     syncToSystemCalendar: Boolean, onSyncChange: (Boolean) -> Unit,
     useCalendarNotification: Boolean, onUseCalendarNotificationChange: (Boolean) -> Unit,
+    lunarMonths: Array<String> = emptyArray(),
+    lunarDays: Array<String> = emptyArray(),
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -74,8 +77,8 @@ fun CountdownEventForm(
         // 1. 标题
         OutlinedTextField(
             value = title, onValueChange = onTitleChange,
-            label = { Text("倒数日标题") },
-            placeholder = { Text("例如：跨年夜、父母生日") },
+            label = { Text(stringResource(R.string.event_title_label)) },
+            placeholder = { Text(stringResource(R.string.event_title_placeholder)) },
             singleLine = true, modifier = Modifier.fillMaxWidth()
         )
 
@@ -85,12 +88,12 @@ fun CountdownEventForm(
                 selected = !isLunar,
                 onClick = { onIsLunarChange(false); onIsLunarWithoutYearChange(false) },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-            ) { Text("公历") }
+            ) { Text(stringResource(R.string.solar)) }
             SegmentedButton(
                 selected = isLunar,
                 onClick = { onIsLunarChange(true) },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-            ) { Text("农历") }
+            ) { Text(stringResource(R.string.lunar)) }
         }
 
         // 3. 农历二级选项
@@ -100,7 +103,7 @@ fun CountdownEventForm(
                     selected = !isLunarWithoutYear,
                     onClick = { onIsLunarWithoutYearChange(false) },
                     shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                ) { Text("年份推算", style = MaterialTheme.typography.labelMedium) }
+                ) { Text(stringResource(R.string.by_year), style = MaterialTheme.typography.labelMedium) }
                 SegmentedButton(
                     selected = isLunarWithoutYear,
                     onClick = {
@@ -109,26 +112,26 @@ fun CountdownEventForm(
                         onRepeatIntervalChange("YEARLY")
                     },
                     shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                ) { Text("指定月日", style = MaterialTheme.typography.labelMedium) }
+                ) { Text(stringResource(R.string.by_month_day), style = MaterialTheme.typography.labelMedium) }
             }
         }
 
         // 4. 日期/月日选择
         if (isLunar && isLunarWithoutYear) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                LunarDropdown(label = "农历月", options = LUNAR_MONTHS, selectedIndex = lunarMonth - 1, onSelect = { onLunarMonthChange(it + 1) }, modifier = Modifier.weight(1f))
-                LunarDropdown(label = "农历日", options = LUNAR_DAYS, selectedIndex = lunarDay - 1, onSelect = { onLunarDayChange(it + 1) }, modifier = Modifier.weight(1f))
+                LunarDropdown(label = stringResource(R.string.lunar_month_label), options = lunarMonths, selectedIndex = lunarMonth - 1, onSelect = { onLunarMonthChange(it + 1) }, modifier = Modifier.weight(1f))
+                LunarDropdown(label = stringResource(R.string.lunar_day_label), options = lunarDays, selectedIndex = lunarDay - 1, onSelect = { onLunarDayChange(it + 1) }, modifier = Modifier.weight(1f))
             }
         } else {
-            val solarDateStr = targetDate.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"))
+            val solarDateStr = targetDate.format(DateTimeFormatter.ofPattern(stringResource(R.string.date_format_full)))
             val displayText = if (isLunar) {
-                "$solarDateStr (农历 ${DateUtils.getLunarDescription(targetDate)})"
+                "$solarDateStr (${stringResource(R.string.lunar_prefix, DateUtils.getLunarDescription(targetDate))})"
             } else {
                 solarDateStr
             }
             OutlinedTextField(
                 value = displayText,
-                onValueChange = {}, label = { Text(if (isLunar) "原始公历日期" else "目标日期") },
+                onValueChange = {}, label = { Text(if (isLunar) stringResource(R.string.original_solar_date) else stringResource(R.string.target_date)) },
                 readOnly = true, trailingIcon = { Icon(Icons.Default.DateRange, null) },
                 modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true },
                 enabled = false,
@@ -143,7 +146,7 @@ fun CountdownEventForm(
         // 5. 重复与通知 (Slider/Switch)
         val forceRepeat = isLunar && isLunarWithoutYear
         ListItem(
-            headlineContent = { Text("开启重复提醒") },
+            headlineContent = { Text(stringResource(R.string.enable_repeat)) },
             trailingContent = { Switch(checked = if (forceRepeat) true else isRepeatEnabled, onCheckedChange = onRepeatEnabledChange, enabled = !forceRepeat) }
         )
 
@@ -152,13 +155,13 @@ fun CountdownEventForm(
         }
 
         Column {
-            Text("提前提醒天数: ${notifyDaysInAdvance.toInt()} 天", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.days_in_advance, notifyDaysInAdvance.toInt()), style = MaterialTheme.typography.bodyLarge)
             Slider(value = notifyDaysInAdvance, onValueChange = onNotifyDaysChange, valueRange = 0f..30f, steps = 29)
         }
 
         ListItem(
-            headlineContent = { Text("通知时间") },
-            supportingContent = { Text("到达提醒日时，将在该时间发送通知") },
+            headlineContent = { Text(stringResource(R.string.notify_time)) },
+            supportingContent = { Text(stringResource(R.string.notify_time_desc)) },
             trailingContent = {
                 Text(
                     text = String.format(Locale.getDefault(), "%02d:%02d", notifyTimeHour, notifyTimeMinute),
@@ -172,14 +175,14 @@ fun CountdownEventForm(
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         ListItem(
-            headlineContent = { Text("同步到系统日历") },
+            headlineContent = { Text(stringResource(R.string.sync_to_calendar)) },
             trailingContent = { Switch(checked = syncToSystemCalendar, onCheckedChange = onSyncChange) }
         )
 
         if (syncToSystemCalendar) {
             ListItem(
-                headlineContent = { Text("开启日历事件提醒") },
-                supportingContent = { Text("在系统日历中设置提醒") },
+                headlineContent = { Text(stringResource(R.string.enable_calendar_notify)) },
+                supportingContent = { Text(stringResource(R.string.calendar_notify_desc)) },
                 trailingContent = { Switch(checked = useCalendarNotification, onCheckedChange = onUseCalendarNotificationChange) }
             )
         }
@@ -193,8 +196,8 @@ fun CountdownEventForm(
             confirmButton = { TextButton(onClick = {
                 datePickerState.selectedDateMillis?.let { onTargetDateChange(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()) }
                 showDatePicker = false
-            }) { Text("确定") } },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("取消") } }
+            }) { Text(stringResource(R.string.confirm)) } },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.cancel)) } }
         ) {
             if (isLunar) {
                 LunarDatePicker(state = datePickerState)
@@ -218,10 +221,10 @@ fun CountdownEventForm(
                     onNotifyTimeHourChange(timePickerState.hour)
                     onNotifyTimeMinuteChange(timePickerState.minute)
                     showTimePicker = false
-                }) { Text("确定") }
+                }) { Text(stringResource(R.string.confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("取消") }
+                TextButton(onClick = { showTimePicker = false }) { Text(stringResource(R.string.cancel)) }
             },
             text = {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
@@ -249,12 +252,17 @@ fun LunarDropdown(label: String, options: Array<String>, selectedIndex: Int, onS
 
 @Composable
 fun RepeatIntervalDropdown(selectedInterval: String, onSelect: (String) -> Unit, enabled: Boolean) {
-    val options = listOf("DAILY" to "每天", "WEEKLY" to "每周", "MONTHLY" to "每月", "YEARLY" to "每年")
+    val options = listOf(
+        "DAILY" to stringResource(R.string.daily),
+        "WEEKLY" to stringResource(R.string.weekly),
+        "MONTHLY" to stringResource(R.string.monthly),
+        "YEARLY" to stringResource(R.string.yearly)
+    )
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded = expanded && enabled, onExpandedChange = { if(enabled) expanded = !expanded }) {
         OutlinedTextField(
             value = options.find { it.first == selectedInterval }?.second ?: "", onValueChange = {}, readOnly = true,
-            label = { Text("重复频率") }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            label = { Text(stringResource(R.string.repeat_interval)) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier.menuAnchor().fillMaxWidth(), enabled = enabled
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -265,6 +273,8 @@ fun RepeatIntervalDropdown(selectedInterval: String, onSelect: (String) -> Unit,
 
 @Composable
 fun LunarDatePicker(state: DatePickerState) {
+    val weekdays = stringArrayResource(R.array.weekdays_short)
+    
     var viewedMonth by remember {
         val initial = state.selectedDateMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() } ?: LocalDate.now()
         mutableStateOf(YearMonth.from(initial))
@@ -276,7 +286,7 @@ fun LunarDatePicker(state: DatePickerState) {
         // Headline Section
         val selectedDate = state.selectedDateMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
         Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 16.dp)) {
-            Text(text = "选择日期", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(R.string.select_date), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -284,11 +294,12 @@ fun LunarDatePicker(state: DatePickerState) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = selectedDate?.format(DateTimeFormatter.ofPattern("yyyy年M月d日")) ?: "未选择",
+                    text = selectedDate?.format(DateTimeFormatter.ofPattern(stringResource(R.string.date_format_picker_headline))) ?: stringResource(R.string.select_date),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
+                // ... (I'll fix the "未选择" below)
                 IconButton(onClick = { isInputMode = !isInputMode }) {
                     Icon(if (isInputMode) Icons.Default.DateRange else Icons.Default.Edit, contentDescription = "切换输入模式")
                 }
@@ -318,8 +329,8 @@ fun LunarDatePicker(state: DatePickerState) {
                             } catch (e: Exception) { }
                         }
                     },
-                    label = { Text("公历日期") },
-                    placeholder = { Text("yyyy/MM/dd") },
+                    label = { Text(stringResource(R.string.solar_date_label)) },
+                    placeholder = { Text(stringResource(R.string.input_date_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
@@ -345,7 +356,7 @@ fun LunarDatePicker(state: DatePickerState) {
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
-                                        text = "农",
+                                        text = stringResource(R.string.lunar).take(1),
                                         style = MaterialTheme.typography.titleSmall,
                                         color = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
@@ -354,7 +365,7 @@ fun LunarDatePicker(state: DatePickerState) {
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
                                 Text(
-                                    text = "转换农历",
+                                    text = stringResource(R.string.lunar_convert),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -392,8 +403,16 @@ fun LunarDatePicker(state: DatePickerState) {
                     modifier = Modifier.clip(CircleShape).clickable { isYearPickerVisible = true }.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val yearLabel = viewedMonth.year.toString()
+                    val monthLabel = viewedMonth.monthValue.toString()
+                    val yearMonthDisplay = if (Locale.getDefault().language == "zh") {
+                        "${yearLabel}年${monthLabel}月"
+                    } else {
+                        viewedMonth.format(DateTimeFormatter.ofPattern("MMM yyyy"))
+                    }
+                    
                     Text(
-                        text = "${viewedMonth.year}年${viewedMonth.monthValue}月 ($lunarMonthDesc)",
+                        text = "$yearMonthDisplay ($lunarMonthDesc)",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -415,8 +434,7 @@ fun LunarDatePicker(state: DatePickerState) {
 
             // Weekday Header
             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                val daysOfWeek = listOf("日", "一", "二", "三", "四", "五", "六")
-                daysOfWeek.forEach { day ->
+                weekdays.forEach { day ->
                     Text(
                         text = day,
                         modifier = Modifier.weight(1f),
@@ -560,7 +578,9 @@ fun FormPreview() {
             notifyTimeHour = 9, onNotifyTimeHourChange = {},
             notifyTimeMinute = 30, onNotifyTimeMinuteChange = {},
             syncToSystemCalendar = false, onSyncChange = {},
-            useCalendarNotification = false, onUseCalendarNotificationChange = {}
+            useCalendarNotification = false, onUseCalendarNotificationChange = {},
+            lunarMonths = stringArrayResource(R.array.lunar_months),
+            lunarDays = stringArrayResource(R.array.lunar_days)
         )
     }
 }

@@ -28,14 +28,14 @@ class NotificationReceiver : BroadcastReceiver() {
         fun sendTestNotification(context: Context) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(CHANNEL_ID, "倒数日提醒", NotificationManager.IMPORTANCE_HIGH)
+                val channel = NotificationChannel(CHANNEL_ID, context.getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_HIGH)
                 notificationManager.createNotificationChannel(channel)
             }
 
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle("这是一条测试通知")
-                .setContentText("如果您能看到这条消息，说明通知功能运行正常。")
+                .setContentTitle(context.getString(R.string.test_notification_title))
+                .setContentText(context.getString(R.string.test_notification_content))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .build()
@@ -45,7 +45,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val eventId = intent.getLongExtra(EXTRA_EVENT_ID, -1L)
-        val title = intent.getStringExtra(EXTRA_TITLE) ?: "您的倒数日"
+        val title = intent.getStringExtra(EXTRA_TITLE) ?: context.getString(R.string.notification_default_title)
         val daysLeft = intent.getIntExtra(EXTRA_DAYS_LEFT, 0)
 
         if (eventId == -1L) return
@@ -53,11 +53,12 @@ class NotificationReceiver : BroadcastReceiver() {
         // 1. 发送通知
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "倒数日提醒", NotificationManager.IMPORTANCE_HIGH)
+            val channel = NotificationChannel(CHANNEL_ID, context.getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
         }
 
-        val contentText = if (daysLeft == 0) "就是今天！" else "距离目标还有 $daysLeft 天"
+        val contentText = if (daysLeft == 0) context.getString(R.string.notification_today) 
+                          else context.getString(R.string.notification_days_left, daysLeft)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)

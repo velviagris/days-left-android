@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "io.materialdaysleft.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.materialdaysleft.app"

@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.gson.reflect.TypeToken
+import androidx.compose.ui.res.stringResource
+import io.materialdaysleft.app.R
 import io.materialdaysleft.app.data.local.CountdownEventEntity
 import io.materialdaysleft.app.receiver.NotificationReceiver
 import io.materialdaysleft.app.ui.viewmodel.CountdownViewModel
@@ -64,7 +66,10 @@ fun SettingsScreen(
     ) { isGranted ->
         hasNotificationPermission = isGranted
         coroutineScope.launch {
-            snackbarHostState.showSnackbar(if (isGranted) "已获得通知权限" else "已拒绝通知权限，倒数日提醒将无法工作")
+            snackbarHostState.showSnackbar(
+                if (isGranted) context.getString(R.string.notification_permission_granted)
+                else context.getString(R.string.notification_permission_refused)
+            )
         }
     }
 
@@ -85,7 +90,8 @@ fun SettingsScreen(
 
         coroutineScope.launch {
             snackbarHostState.showSnackbar(
-                if (hasCalendarPermission) "已获得系统日历读写权限" else "已拒绝日历权限，将无法自动同步日程"
+                if (hasCalendarPermission) context.getString(R.string.calendar_permission_granted_toast)
+                else context.getString(R.string.calendar_permission_refused_toast)
             )
         }
     }
@@ -104,11 +110,11 @@ fun SettingsScreen(
                         outputStream.write(jsonString.toByteArray())
                     }
                     withContext(Dispatchers.Main) {
-                        snackbarHostState.showSnackbar("备份导出成功！")
+                        snackbarHostState.showSnackbar(context.getString(R.string.export_success))
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
-                        snackbarHostState.showSnackbar("导出失败: ${e.localizedMessage}")
+                        snackbarHostState.showSnackbar(context.getString(R.string.export_failed, e.localizedMessage))
                     }
                 }
             }
@@ -135,12 +141,12 @@ fun SettingsScreen(
 
                     withContext(Dispatchers.Main) {
                         viewModel.insertMultipleEvents(safeEvents) {
-                            coroutineScope.launch { snackbarHostState.showSnackbar("成功恢复 ${safeEvents.size} 条记录！") }
+                            coroutineScope.launch { snackbarHostState.showSnackbar(context.getString(R.string.import_success, safeEvents.size)) }
                         }
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
-                        snackbarHostState.showSnackbar("导入失败，文件格式可能不正确")
+                        snackbarHostState.showSnackbar(context.getString(R.string.import_failed))
                     }
                 }
             }
@@ -150,7 +156,7 @@ fun SettingsScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
-            TopAppBar(title = { Text("设置") })
+            TopAppBar(title = { Text(stringResource(R.string.settings)) })
         },
         modifier = modifier
     ) { innerPadding ->
@@ -162,7 +168,7 @@ fun SettingsScreen(
         ) {
             // --- 权限设置组 ---
             Text(
-                text = "系统权限",
+                text = stringResource(R.string.system_permissions),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -170,14 +176,14 @@ fun SettingsScreen(
 
             // 通知权限入口
             ListItem(
-                headlineContent = { Text("通知与提醒权限") },
-                supportingContent = { Text(if (hasNotificationPermission) "已授权，可以正常接收倒数日提醒" else "未授权，点击申请权限") },
+                headlineContent = { Text(stringResource(R.string.notification_permission)) },
+                supportingContent = { Text(if (hasNotificationPermission) stringResource(R.string.permission_granted) else stringResource(R.string.permission_denied)) },
                 leadingContent = { Icon(Icons.Filled.Notifications, contentDescription = null) },
                 modifier = Modifier.clickable {
                     if (!hasNotificationPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     } else if (hasNotificationPermission) {
-                        coroutineScope.launch { snackbarHostState.showSnackbar("通知权限已配置妥当") }
+                        coroutineScope.launch { snackbarHostState.showSnackbar(context.getString(R.string.notification_permission_ready)) }
                     }
                 }
             )
@@ -185,8 +191,8 @@ fun SettingsScreen(
             // 发送测试通知按钮
             if (hasNotificationPermission) {
                 ListItem(
-                    headlineContent = { Text("发送测试通知", color = MaterialTheme.colorScheme.primary) },
-                    supportingContent = { Text("点击测试通知功能是否正常") },
+                    headlineContent = { Text(stringResource(R.string.test_notification), color = MaterialTheme.colorScheme.primary) },
+                    supportingContent = { Text(stringResource(R.string.test_notification_desc)) },
                     leadingContent = { Icon(Icons.Filled.Build, contentDescription = null) },
                     modifier = Modifier.clickable {
                         NotificationReceiver.sendTestNotification(context)
@@ -196,8 +202,8 @@ fun SettingsScreen(
 
             // 日历权限入口
             ListItem(
-                headlineContent = { Text("系统日历同步权限") },
-                supportingContent = { Text(if (hasCalendarPermission) "已授权，可以自动将倒数日写入日历" else "未授权，点击申请日历读写权限") },
+                headlineContent = { Text(stringResource(R.string.calendar_sync_permission)) },
+                supportingContent = { Text(if (hasCalendarPermission) stringResource(R.string.calendar_permission_granted_hint) else stringResource(R.string.calendar_permission_denied_hint)) },
                 leadingContent = { Icon(Icons.Filled.DateRange, contentDescription = null) },
                 modifier = Modifier.clickable {
                     if (!hasCalendarPermission) {
@@ -209,7 +215,7 @@ fun SettingsScreen(
                             )
                         )
                     } else {
-                        coroutineScope.launch { snackbarHostState.showSnackbar("日历权限已配置妥当") }
+                        coroutineScope.launch { snackbarHostState.showSnackbar(context.getString(R.string.calendar_permission_ready)) }
                     }
                 }
             )
@@ -218,15 +224,15 @@ fun SettingsScreen(
 
             // --- 数据备份组 ---
             Text(
-                text = "数据备份与恢复",
+                text = stringResource(R.string.data_backup_restore),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
             )
 
             ListItem(
-                headlineContent = { Text("导出备份") },
-                supportingContent = { Text("将所有倒数日保存为 JSON 文件") },
+                headlineContent = { Text(stringResource(R.string.export_backup)) },
+                supportingContent = { Text(stringResource(R.string.export_backup_desc)) },
                 modifier = Modifier.clickable {
                     val fileName = "MaterialDaysLeft_Backup_${System.currentTimeMillis()}.json"
                     exportLauncher.launch(fileName)
@@ -234,8 +240,8 @@ fun SettingsScreen(
             )
 
             ListItem(
-                headlineContent = { Text("导入恢复") },
-                supportingContent = { Text("从本地的 JSON 文件中合并数据") },
+                headlineContent = { Text(stringResource(R.string.import_restore)) },
+                supportingContent = { Text(stringResource(R.string.import_restore_desc)) },
                 modifier = Modifier.clickable {
                     importLauncher.launch(arrayOf("application/json", "*/*"))
                 }

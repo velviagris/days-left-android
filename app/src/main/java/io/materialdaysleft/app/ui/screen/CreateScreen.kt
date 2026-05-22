@@ -7,23 +7,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import io.materialdaysleft.app.R
 import io.materialdaysleft.app.ui.component.CountdownEventForm
 import io.materialdaysleft.app.ui.viewmodel.CountdownViewModel
 import java.time.LocalDate
-
-/**
- * 农历月份的中文字典
- */
-val LUNAR_MONTHS = arrayOf("正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "冬月", "腊月")
-
-/**
- * 农历日期的中文字典
- */
-val LUNAR_DAYS = arrayOf(
-    "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
-    "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-    "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
-)
 
 @Composable
 fun CreateBottomSheet(
@@ -32,6 +21,9 @@ fun CreateBottomSheet(
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    val lunarMonths = stringArrayResource(R.array.lunar_months)
+    val lunarDays = stringArrayResource(R.array.lunar_days)
 
     // 表单局部状态
     var title by remember { mutableStateOf("") }
@@ -59,7 +51,7 @@ fun CreateBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
-                Text("添加倒数日", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.add_event), style = MaterialTheme.typography.titleLarge)
                 TextButton(
                     onClick = {
                         val baseDate = if (isLunar && isLunarWithoutYear) {
@@ -84,7 +76,7 @@ fun CreateBottomSheet(
                         onDismiss()
                     },
                     enabled = title.isNotBlank()
-                ) { Text("保存") }
+                ) { Text(stringResource(R.string.save)) }
             }
 
             CountdownEventForm(
@@ -100,7 +92,9 @@ fun CreateBottomSheet(
                 notifyTimeHour = notifyTimeHour, onNotifyTimeHourChange = { notifyTimeHour = it },
                 notifyTimeMinute = notifyTimeMinute, onNotifyTimeMinuteChange = { notifyTimeMinute = it },
                 syncToSystemCalendar = syncToSystemCalendar, onSyncChange = { syncToSystemCalendar = it },
-                useCalendarNotification = useCalendarNotification, onUseCalendarNotificationChange = { useCalendarNotification = it }
+                useCalendarNotification = useCalendarNotification, onUseCalendarNotificationChange = { useCalendarNotification = it },
+                lunarMonths = lunarMonths,
+                lunarDays = lunarDays
             )
         }
     }
