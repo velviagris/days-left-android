@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "io.materialdaysleft.app"
+    namespace = "io.daysleft.app"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "io.materialdaysleft.app"
+        applicationId = "io.daysleft.app"
         minSdk = 33
         targetSdk = 36
         versionCode = 1

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">质感倒数日</string>
+    <string name="app_name">DaysLeft</string>
     <string name="empty_list_hint">暂无倒数日\n点击右下角 + 号添加吧！</string>
     <string name="next_occurrence_label">下次: %s</string>
     <string name="lunar_label">农历</string>
@@ -86,7 +86,7 @@
     <string name="notification_today">就是今天！</string>
     <string name="notification_days_left">距离目标还有 %d 天</string>
     <string name="calendar_event_prefix">倒数日: %s</string>
-    <string name="calendar_event_desc">由 Material DaysLeft 自动生成</string>
+    <string name="calendar_event_desc">由 DaysLeft 自动生成</string>
     <string name="date_format_full">yyyy年MM月dd日</string>
     <string name="date_format_picker_headline">yyyy年M月d日</string>
     <string name="lunar_month_suffix">月</string>

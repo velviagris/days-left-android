@@ -1,4 +1,4 @@
-MaterialDaysLeft 初始版本发布。
+DaysLeft 初始版本发布。
 - 支持公历和农历。
 - 采用 Material 3 设计，支持动态配色。
 - 支持系统日历同步。

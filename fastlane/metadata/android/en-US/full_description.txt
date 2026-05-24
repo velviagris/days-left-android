@@ -1,4 +1,4 @@
-MaterialDaysLeft is a clean, modern countdown application for Android, built with Jetpack Compose and Material 3 design principles. It helps you keep track of important events with ease, supporting both Gregorian and Lunar calendars.
+DaysLeft is a clean, modern countdown application for Android, built with Jetpack Compose and Material 3 design principles. It helps you keep track of important events with ease, supporting both Gregorian and Lunar calendars.
 
 Features:
 - Material 3 Design: A modern, clean interface that supports dynamic color (Material You).

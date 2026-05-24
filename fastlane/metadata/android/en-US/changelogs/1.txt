@@ -1,4 +1,4 @@
-Initial release of MaterialDaysLeft.
+Initial release of DaysLeft.
 - Support for Gregorian and Lunar calendars.
 - Material 3 design with dynamic color.
 - System calendar synchronization.

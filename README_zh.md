@@ -1,6 +1,6 @@
-# MaterialDaysLeft (倒数日)
+# DaysLeft (倒数日)
 
-MaterialDaysLeft 是一款简洁、现代的 Android 倒数日应用，采用 Jetpack Compose 和 Material 3 设计理念构建。它可以帮助您轻松追踪重要事件，同时支持公历和农历。
+DaysLeft 是一款简洁、现代的 Android 倒数日应用，采用 Jetpack Compose 和 Material 3 设计理念构建。它可以帮助您轻松追踪重要事件，同时支持公历和农历。
 
 ## 功能特点
 
@@ -27,7 +27,7 @@ MaterialDaysLeft 是一款简洁、现代的 Android 倒数日应用，采用 Je
 
 ## 下载
 
-- [Github](https://github.com/velviagris/MaterialDaysLeft/releases)
+- [Github](https://github.com/velviagris/DaysLeft/releases)
 
 ## 贡献
 
