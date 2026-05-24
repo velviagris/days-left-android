@@ -1,0 +1,38 @@
+# MaterialDaysLeft (倒数日)
+
+MaterialDaysLeft 是一款简洁、现代的 Android 倒数日应用，采用 Jetpack Compose 和 Material 3 设计理念构建。它可以帮助您轻松追踪重要事件，同时支持公历和农历。
+
+## 功能特点
+
+- **Material 3 设计**：现代、简洁的界面，支持动态配色 (Material You)。
+- **公历与农历支持**：支持标准公历和中国农历事件。
+- **系统日历同步**：自动将倒数日事件同步到 Android 系统日历。
+- **闹钟提醒**：通过本地闹钟通知，确保您不会错过任何重要时刻。
+- **多种视图模式**：支持列表和网格视图展示您的事件。
+- **注重隐私**：无追踪、无广告，完全开源。支持离线使用。
+
+## 屏幕截图
+
+*(在此添加屏幕截图)*
+
+## 技术细节
+
+- **开发语言**: Kotlin
+- **UI 框架**: Jetpack Compose
+- **架构**: MVVM
+- **数据库**: Room
+- **状态管理**: Kotlin Flow & ViewModel
+- **本地存储**: DataStore Preferences
+- **农历支持**: [lunar-java](https://github.com/6tail/lunar-java)
+
+## 下载
+
+- [Github](https://github.com/velviagris/MaterialDaysLeft/releases)
+
+## 贡献
+
+欢迎提供建议或提交 Pull Request！
+
+## 开源协议
+
+本项目采用 MIT 协议 - 详情请参阅 [LICENSE](LICENSE) 文件。
