@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "io.daysleft.app"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.daysleft.app"
