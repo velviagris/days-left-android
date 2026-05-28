@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DaysLeft</string>
+    <string name="app_name">质感倒数日</string>
     <string name="empty_list_hint">暂无倒数日\n点击右下角 + 号添加吧！</string>
     <string name="next_occurrence_label">下次: %s</string>
     <string name="lunar_label">农历</string>
