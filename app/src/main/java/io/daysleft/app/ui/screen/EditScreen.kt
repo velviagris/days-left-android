@@ -4,6 +4,7 @@ package io.daysleft.app.ui.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,7 +62,7 @@ fun EditBottomSheet(
                         Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colorScheme.error)
                     }
                     Text(stringResource(R.string.edit_details), style = MaterialTheme.typography.titleLarge)
-                    TextButton(onClick = {
+                    IconButton(onClick = {
                         val baseDate = if (isLunar && isLunarWithoutYear) {
                             val solar = com.nlf.calendar.Lunar.fromYmd(LocalDate.now().year, lunarMonth, lunarDay).solar
                             LocalDate.of(solar.year, solar.month, solar.day)
@@ -86,7 +87,9 @@ fun EditBottomSheet(
                             useCalendarNotification = useCalendarNotification
                         ))
                         onDismiss()
-                    }) { Text(stringResource(R.string.update)) }
+                    }) {
+                        Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.update))
+                    }
                 }
 
                 _root_ide_package_.io.daysleft.app.ui.component.CountdownEventForm(
