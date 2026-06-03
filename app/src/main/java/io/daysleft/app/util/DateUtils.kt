@@ -3,6 +3,7 @@ package io.daysleft.app.util
 import com.nlf.calendar.Lunar
 import com.nlf.calendar.Solar
 import io.daysleft.app.data.local.CountdownEventEntity
+import io.daysleft.app.data.local.RepeatInterval
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -14,14 +15,16 @@ object DateUtils {
         val today = LocalDate.now()
         if (!event.isRepeatEnabled) return event.targetDate
 
-        if (event.isLunar && event.repeatInterval == "YEARLY") {
+        if (event.isLunar && event.repeatInterval == RepeatInterval.YEARLY) {
             // ... (农历计算逻辑保持不变，直接复用您现有的农历逻辑) ...
+            val currentLunarMonth = event.lunarMonth
+            val currentLunarDay = event.lunarDay
             val targetLunarMonth: Int
             val targetLunarDay: Int
 
-            if (event.lunarMonth != null && event.lunarDay != null) {
-                targetLunarMonth = event.lunarMonth
-                targetLunarDay = event.lunarDay
+            if (currentLunarMonth != null && currentLunarDay != null) {
+                targetLunarMonth = currentLunarMonth
+                targetLunarDay = currentLunarDay
             } else {
                 val solarOfTarget = Solar.fromYmd(event.targetDate.year, event.targetDate.monthValue, event.targetDate.dayOfMonth)
                 targetLunarMonth = solarOfTarget.lunar.month
@@ -44,20 +47,21 @@ object DateUtils {
             var nextDate = event.targetDate
             if (nextDate.isBefore(today) || nextDate.isEqual(today)) {
                 when (event.repeatInterval) {
-                    "DAILY" -> nextDate = today // 每天重复，基准就是今天
-                    "WEEKLY" -> {
+                    RepeatInterval.DAILY -> nextDate = today // 每天重复，基准就是今天
+                    RepeatInterval.WEEKLY -> {
                         val daysBetween = ChronoUnit.DAYS.between(nextDate, today)
                         val weeksToAdd = (daysBetween / 7) + 1
                         nextDate = nextDate.plusWeeks(weeksToAdd)
                     }
-                    "MONTHLY" -> {
+                    RepeatInterval.MONTHLY -> {
                         val monthsBetween = ChronoUnit.MONTHS.between(nextDate, today)
                         nextDate = nextDate.plusMonths(monthsBetween + 1)
                     }
-                    "YEARLY" -> {
+                    RepeatInterval.YEARLY -> {
                         nextDate = nextDate.withYear(today.year)
                         if (nextDate.isBefore(today)) nextDate = nextDate.plusYears(1)
                     }
+                    null -> {}
                 }
             }
             return nextDate

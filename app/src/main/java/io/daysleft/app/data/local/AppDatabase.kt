@@ -34,7 +34,7 @@ abstract class AppDatabase : RoomDatabase() {
                 Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "material_days_left_db"
+                    "daysleft_db"
                 )
                     // 在开发初期，当 schema 发生改变时，采取破坏性迁移（清空数据）
                     // 生产环境需替换为 addMigrations()

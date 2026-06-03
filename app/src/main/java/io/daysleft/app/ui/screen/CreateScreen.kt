@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import io.daysleft.app.R
+import io.daysleft.app.data.local.LunarInfo
+import io.daysleft.app.data.local.RepeatInterval
 import io.daysleft.app.ui.component.CountdownEventForm
 import io.daysleft.app.ui.viewmodel.CountdownViewModel
 import java.time.LocalDate
@@ -60,12 +62,17 @@ fun CreateBottomSheet(
                         } else targetDate
 
                         viewModel.insertEvent(io.daysleft.app.data.local.CountdownEventEntity(
-                            title = title, targetDate = baseDate, isLunar = isLunar,
-                            isLunarWithoutYear = isLunarWithoutYear,
-                            lunarMonth = if (isLunarWithoutYear) lunarMonth else null,
-                            lunarDay = if (isLunarWithoutYear) lunarDay else null,
-                            isRepeatEnabled = if (isLunarWithoutYear) true else isRepeatEnabled,
-                            repeatInterval = if (isLunarWithoutYear) "YEARLY" else repeatInterval,
+                            title = title,
+                            targetDate = baseDate,
+                            lunarInfo = LunarInfo(
+                                isLunar = isLunar,
+                                isLunarWithoutYear = isLunarWithoutYear,
+                                lunarMonth = if (isLunarWithoutYear) lunarMonth else null,
+                                lunarDay = if (isLunarWithoutYear) lunarDay else null
+                            ),
+                            repeatInterval = if (isRepeatEnabled || isLunarWithoutYear) {
+                                RepeatInterval.valueOf(if (isLunarWithoutYear) "YEARLY" else repeatInterval)
+                            } else null,
                             notifyDaysInAdvance = notifyDaysInAdvance.toInt(),
                             notifyTimeHour = notifyTimeHour,       // 存入数据库
                             notifyTimeMinute = notifyTimeMinute,   // 存入数据库

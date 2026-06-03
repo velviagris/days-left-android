@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import io.daysleft.app.R
 import io.daysleft.app.data.local.CountdownEventEntity
+import io.daysleft.app.data.local.LunarInfo
+import io.daysleft.app.data.local.RepeatInterval
 import io.daysleft.app.ui.theme.DaysLeftTheme
 import io.daysleft.app.ui.viewmodel.CountdownViewModel
 import io.daysleft.app.util.DateUtils
@@ -175,10 +177,10 @@ fun CountdownEventCard(event: CountdownEventEntity,onClick: () -> Unit) {
                     }
                     if (event.isRepeatEnabled) {
                         val intervalText = when (event.repeatInterval) {
-                            "DAILY" -> stringResource(R.string.daily)
-                            "WEEKLY" -> stringResource(R.string.weekly)
-                            "MONTHLY" -> stringResource(R.string.monthly)
-                            "YEARLY" -> stringResource(R.string.yearly)
+                            RepeatInterval.DAILY -> stringResource(R.string.daily)
+                            RepeatInterval.WEEKLY -> stringResource(R.string.weekly)
+                            RepeatInterval.MONTHLY -> stringResource(R.string.monthly)
+                            RepeatInterval.YEARLY -> stringResource(R.string.yearly)
                             else -> stringResource(R.string.repeat)
                         }
                         EventTag(text = intervalText)
@@ -240,9 +242,8 @@ fun HomeScreenPreview_WithData() {
                 id = 1,
                 title = "跨年夜",
                 targetDate = LocalDate.now().plusDays(24),
-                isLunar = false,
-                isRepeatEnabled = true,
-                repeatInterval = "YEARLY",
+                lunarInfo = LunarInfo(isLunar = false),
+                repeatInterval = RepeatInterval.YEARLY,
                 notifyDaysInAdvance = 1,
                 syncToSystemCalendar = true,
                 calendarEventId = null
@@ -251,9 +252,8 @@ fun HomeScreenPreview_WithData() {
                 id = 2,
                 title = "老妈生日",
                 targetDate = LocalDate.now().plusDays(5),
-                isLunar = true,
-                isRepeatEnabled = true,
-                repeatInterval = "YEARLY",
+                lunarInfo = LunarInfo(isLunar = true),
+                repeatInterval = RepeatInterval.YEARLY,
                 notifyDaysInAdvance = 3,
                 syncToSystemCalendar = false,
                 calendarEventId = null
@@ -262,8 +262,7 @@ fun HomeScreenPreview_WithData() {
                 id = 3,
                 title = "驾照考试",
                 targetDate = LocalDate.now(),
-                isLunar = false,
-                isRepeatEnabled = false,
+                lunarInfo = LunarInfo(isLunar = false),
                 repeatInterval = null,
                 notifyDaysInAdvance = 0,
                 syncToSystemCalendar = true,
@@ -273,8 +272,7 @@ fun HomeScreenPreview_WithData() {
                 id = 4,
                 title = "上次旅游",
                 targetDate = LocalDate.now().minusDays(128),
-                isLunar = false,
-                isRepeatEnabled = false,
+                lunarInfo = LunarInfo(isLunar = false),
                 repeatInterval = null,
                 notifyDaysInAdvance = 0,
                 syncToSystemCalendar = false,

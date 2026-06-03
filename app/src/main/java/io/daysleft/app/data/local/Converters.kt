@@ -13,4 +13,20 @@ class Converters {
     fun dateToTimestamp(date: LocalDate?): String? {
         return date?.toString()
     }
+
+    @TypeConverter
+    fun fromRepeatInterval(value: String?): RepeatInterval? {
+        return value?.let {
+            try {
+                RepeatInterval.valueOf(it)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+    }
+
+    @TypeConverter
+    fun repeatIntervalToString(interval: RepeatInterval?): String? {
+        return interval?.name
+    }
 }

@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import io.daysleft.app.data.local.CountdownEventEntity
+import io.daysleft.app.data.local.RepeatInterval
 import io.daysleft.app.receiver.NotificationReceiver
 import java.time.LocalDate
 import java.time.ZoneId
@@ -42,10 +43,11 @@ class AlarmScheduler(private val context: Context) {
         if (triggerTime.isBefore(ZonedDateTime.now())) {
             if (event.isRepeatEnabled) {
                 when (event.repeatInterval) {
-                    "DAILY" -> triggerTime = triggerTime.plusDays(1)
-                    "WEEKLY" -> triggerTime = triggerTime.plusWeeks(1)
-                    "MONTHLY" -> triggerTime = triggerTime.plusMonths(1)
-                    "YEARLY" -> triggerTime = triggerTime.plusYears(1)
+                    RepeatInterval.DAILY -> triggerTime = triggerTime.plusDays(1)
+                    RepeatInterval.WEEKLY -> triggerTime = triggerTime.plusWeeks(1)
+                    RepeatInterval.MONTHLY -> triggerTime = triggerTime.plusMonths(1)
+                    RepeatInterval.YEARLY -> triggerTime = triggerTime.plusYears(1)
+                    null -> {}
                 }
             } else {
                 return // 非重复事件，过去就直接抛弃

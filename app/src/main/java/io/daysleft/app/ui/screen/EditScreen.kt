@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import io.daysleft.app.R
+import io.daysleft.app.data.local.LunarInfo
+import io.daysleft.app.data.local.RepeatInterval
 import io.daysleft.app.ui.viewmodel.CountdownViewModel
 import java.time.LocalDate
 
@@ -41,7 +43,7 @@ fun EditBottomSheet(
         var lunarMonth by remember { mutableStateOf(original.lunarMonth ?: 1) }
         var lunarDay by remember { mutableStateOf(original.lunarDay ?: 1) }
         var isRepeatEnabled by remember { mutableStateOf(original.isRepeatEnabled) }
-        var repeatInterval by remember { mutableStateOf(original.repeatInterval ?: "YEARLY") }
+        var repeatInterval by remember { mutableStateOf(original.repeatInterval?.name ?: "YEARLY") }
         var notifyDaysInAdvance by remember { mutableStateOf(original.notifyDaysInAdvance.toFloat()) }
         var notifyTimeHour by remember { mutableStateOf(original.notifyTimeHour) }     // 从数据库回显
         var notifyTimeMinute by remember { mutableStateOf(original.notifyTimeMinute) } // 从数据库回显
@@ -66,12 +68,17 @@ fun EditBottomSheet(
                         } else targetDate
 
                         viewModel.updateEvent(original.copy(
-                            title = title, targetDate = baseDate, isLunar = isLunar,
-                            isLunarWithoutYear = isLunarWithoutYear,
-                            lunarMonth = if (isLunarWithoutYear) lunarMonth else null,
-                            lunarDay = if (isLunarWithoutYear) lunarDay else null,
-                            isRepeatEnabled = if (isLunarWithoutYear) true else isRepeatEnabled,
-                            repeatInterval = if (isLunarWithoutYear) "YEARLY" else repeatInterval,
+                            title = title,
+                            targetDate = baseDate,
+                            lunarInfo = LunarInfo(
+                                isLunar = isLunar,
+                                isLunarWithoutYear = isLunarWithoutYear,
+                                lunarMonth = if (isLunarWithoutYear) lunarMonth else null,
+                                lunarDay = if (isLunarWithoutYear) lunarDay else null
+                            ),
+                            repeatInterval = if (isRepeatEnabled || isLunarWithoutYear) {
+                                RepeatInterval.valueOf(if (isLunarWithoutYear) "YEARLY" else repeatInterval)
+                            } else null,
                             notifyDaysInAdvance = notifyDaysInAdvance.toInt(),
                             notifyTimeHour = notifyTimeHour,       // 更新并保存
                             notifyTimeMinute = notifyTimeMinute,   // 更新并保存

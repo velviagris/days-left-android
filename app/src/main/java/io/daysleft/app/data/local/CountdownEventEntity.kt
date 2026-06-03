@@ -1,25 +1,58 @@
 package io.daysleft.app.data.local
 
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.LocalDate
 
-@Entity(tableName = "countdown_events")
+@Entity(
+    tableName = "countdown_events",
+    indices = [
+        Index(value = ["targetDate"]),
+        Index(value = ["calendarEventId"])
+    ]
+)
 data class CountdownEventEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val title: String,
     val targetDate: LocalDate,
-    val isLunar: Boolean,
-    val isLunarWithoutYear: Boolean = false,
-    val lunarMonth: Int? = null,
-    val lunarDay: Int? = null,
-    val isRepeatEnabled: Boolean,
-    val repeatInterval: String?,
+    
+    @Embedded
+    val lunarInfo: LunarInfo = LunarInfo(),
+    
+    val repeatInterval: RepeatInterval?,
+    
     val notifyDaysInAdvance: Int,
-    val notifyTimeHour: Int = 9,       // 通知时间（小时），默认上午 9 点
-    val notifyTimeMinute: Int = 0,     // 通知时间（分钟），默认 0 分
+    
+    @ColumnInfo(defaultValue = "9")
+    val notifyTimeHour: Int = 9,
+    
+    @ColumnInfo(defaultValue = "0")
+    val notifyTimeMinute: Int = 0,
+    
     val syncToSystemCalendar: Boolean,
-    val useCalendarNotification: Boolean = false, // 新增：是否使用系统日历通知
+    
+    @ColumnInfo(defaultValue = "0")
+    val useCalendarNotification: Boolean = false,
+    
     val calendarEventId: Long?
-)
+) {
+    val isRepeatEnabled: Boolean
+        @Ignore get() = repeatInterval != null
+
+    val isLunar: Boolean
+        @Ignore get() = lunarInfo.isLunar
+
+    val isLunarWithoutYear: Boolean
+        @Ignore get() = lunarInfo.isLunarWithoutYear
+
+    val lunarMonth: Int?
+        @Ignore get() = lunarInfo.lunarMonth
+
+    val lunarDay: Int?
+        @Ignore get() = lunarInfo.lunarDay
+}
