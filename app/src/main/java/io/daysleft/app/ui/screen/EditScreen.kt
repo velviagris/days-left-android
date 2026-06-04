@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import io.daysleft.app.R
 import io.daysleft.app.data.local.LunarInfo
 import io.daysleft.app.data.local.RepeatInterval
+import io.daysleft.app.ui.component.CountdownEventForm
 import io.daysleft.app.ui.viewmodel.CountdownViewModel
 import java.time.LocalDate
 
@@ -40,9 +41,25 @@ fun EditBottomSheet(
         var title by remember { mutableStateOf(original.title) }
         var targetDate by remember { mutableStateOf(original.targetDate) }
         var isLunar by remember { mutableStateOf(original.isLunar) }
-        var isLunarWithoutYear by remember { mutableStateOf(original.isLunarWithoutYear) }
-        var lunarMonth by remember { mutableStateOf(original.lunarMonth ?: 1) }
-        var lunarDay by remember { mutableStateOf(original.lunarDay ?: 1) }
+        var isWithoutYear by remember(original) { mutableStateOf(original.isWithoutYear) }
+        var selectedMonth by remember(original) {
+            mutableStateOf(
+                if (original.isLunar && original.isWithoutYear) {
+                    original.lunarMonth ?: 1
+                } else {
+                    original.targetDate.monthValue
+                }
+            )
+        }
+        var selectedDay by remember(original) {
+            mutableStateOf(
+                if (original.isLunar && original.isWithoutYear) {
+                    original.lunarDay ?: 1
+                } else {
+                    original.targetDate.dayOfMonth
+                }
+            )
+        }
         var isRepeatEnabled by remember { mutableStateOf(original.isRepeatEnabled) }
         var repeatInterval by remember { mutableStateOf(original.repeatInterval?.name ?: "YEARLY") }
         var notifyDaysInAdvance by remember { mutableStateOf(original.notifyDaysInAdvance.toFloat()) }
@@ -50,7 +67,6 @@ fun EditBottomSheet(
         var notifyTimeMinute by remember { mutableStateOf(original.notifyTimeMinute) } // 从数据库回显
         var syncToSystemCalendar by remember { mutableStateOf(original.syncToSystemCalendar) }
         var useCalendarNotification by remember { mutableStateOf(original.useCalendarNotification) }
-
         ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
             Column {
                 Row(
@@ -63,9 +79,13 @@ fun EditBottomSheet(
                     }
                     Text(stringResource(R.string.edit_details), style = MaterialTheme.typography.titleLarge)
                     IconButton(onClick = {
-                        val baseDate = if (isLunar && isLunarWithoutYear) {
-                            val solar = com.nlf.calendar.Lunar.fromYmd(LocalDate.now().year, lunarMonth, lunarDay).solar
-                            LocalDate.of(solar.year, solar.month, solar.day)
+                        val baseDate = if (isWithoutYear) {
+                            if (isLunar) {
+                                val solar = com.nlf.calendar.Lunar.fromYmd(LocalDate.now().year, selectedMonth, selectedDay).solar
+                                LocalDate.of(solar.year, solar.month, solar.day)
+                            } else {
+                                LocalDate.of(2000, selectedMonth, selectedDay)
+                            }
                         } else targetDate
 
                         viewModel.updateEvent(original.copy(
@@ -73,18 +93,19 @@ fun EditBottomSheet(
                             targetDate = baseDate,
                             lunarInfo = LunarInfo(
                                 isLunar = isLunar,
-                                isLunarWithoutYear = isLunarWithoutYear,
-                                lunarMonth = if (isLunarWithoutYear) lunarMonth else null,
-                                lunarDay = if (isLunarWithoutYear) lunarDay else null
+                                isLunarWithoutYear = isLunar && isWithoutYear,
+                                lunarMonth = if (isLunar && isWithoutYear) selectedMonth else null,
+                                lunarDay = if (isLunar && isWithoutYear) selectedDay else null
                             ),
-                            repeatInterval = if (isRepeatEnabled || isLunarWithoutYear) {
-                                RepeatInterval.valueOf(if (isLunarWithoutYear) "YEARLY" else repeatInterval)
+                            repeatInterval = if (isRepeatEnabled || isWithoutYear) {
+                                RepeatInterval.valueOf(if (isWithoutYear) "YEARLY" else repeatInterval)
                             } else null,
                             notifyDaysInAdvance = notifyDaysInAdvance.toInt(),
                             notifyTimeHour = notifyTimeHour,       // 更新并保存
                             notifyTimeMinute = notifyTimeMinute,   // 更新并保存
                             syncToSystemCalendar = syncToSystemCalendar,
-                            useCalendarNotification = useCalendarNotification
+                            useCalendarNotification = useCalendarNotification,
+                            isWithoutYear = isWithoutYear
                         ))
                         onDismiss()
                     }) {
@@ -92,19 +113,19 @@ fun EditBottomSheet(
                     }
                 }
 
-                _root_ide_package_.io.daysleft.app.ui.component.CountdownEventForm(
+                CountdownEventForm(
                     title = title,
                     onTitleChange = { title = it },
                     targetDate = targetDate,
                     onTargetDateChange = { targetDate = it },
                     isLunar = isLunar,
                     onIsLunarChange = { isLunar = it },
-                    isLunarWithoutYear = isLunarWithoutYear,
-                    onIsLunarWithoutYearChange = { isLunarWithoutYear = it },
-                    lunarMonth = lunarMonth,
-                    onLunarMonthChange = { lunarMonth = it },
-                    lunarDay = lunarDay,
-                    onLunarDayChange = { lunarDay = it },
+                    isWithoutYear = isWithoutYear,
+                    onIsWithoutYearChange = { isWithoutYear = it },
+                    selectedMonth = selectedMonth,
+                    onSelectedMonthChange = { selectedMonth = it },
+                    selectedDay = selectedDay,
+                    onSelectedDayChange = { selectedDay = it },
                     isRepeatEnabled = isRepeatEnabled,
                     onRepeatEnabledChange = { isRepeatEnabled = it },
                     repeatInterval = repeatInterval,

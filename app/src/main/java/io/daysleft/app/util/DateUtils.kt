@@ -11,8 +11,8 @@ object DateUtils {
     /**
      * 计算事件的下一次发生日期
      */
-    fun calculateNextOccurrence(event: CountdownEventEntity): LocalDate {
-        val today = LocalDate.now()
+    fun calculateNextOccurrence(event: CountdownEventEntity, fromDate: LocalDate = LocalDate.now()): LocalDate {
+        val today = fromDate
         if (!event.isRepeatEnabled) return event.targetDate
 
         if (event.isLunar && event.repeatInterval == RepeatInterval.YEARLY) {
@@ -91,5 +91,29 @@ object DateUtils {
     fun getLunarDay(date: LocalDate): String {
         val solar = Solar.fromYmd(date.year, date.monthValue, date.dayOfMonth)
         return solar.lunar.dayInChinese
+    }
+
+    /**
+     * 计算事件距离首次日期的岁数/周年数
+     */
+    fun calculateEventYears(event: CountdownEventEntity, nextOccurrence: LocalDate): Int {
+        if (!event.isRepeatEnabled || event.repeatInterval != RepeatInterval.YEARLY) return 0
+        if (event.isWithoutYear) return 0
+        
+        return if (event.isLunar) {
+            val originalLunarYear = Solar.fromYmd(
+                event.targetDate.year,
+                event.targetDate.monthValue,
+                event.targetDate.dayOfMonth
+            ).lunar.year
+            val nextLunarYear = Solar.fromYmd(
+                nextOccurrence.year,
+                nextOccurrence.monthValue,
+                nextOccurrence.dayOfMonth
+            ).lunar.year
+            (nextLunarYear - originalLunarYear).coerceAtLeast(0)
+        } else {
+            (nextOccurrence.year - event.targetDate.year).coerceAtLeast(0)
+        }
     }
 }

@@ -59,8 +59,11 @@
     <string name="event_title_placeholder">e.g. New Year, Parent\'s Birthday</string>
     <string name="solar">Solar</string>
     <string name="lunar">Lunar</string>
-    <string name="by_year">Yearly Prediction</string>
-    <string name="by_month_day">Specify Month/Day</string>
+    <string name="by_year">Year/Month/Day</string>
+    <string name="by_month_day">Month/Day</string>
+    <string name="days_until_years">Days until %d years</string>
+    <string name="month_label">Month</string>
+    <string name="day_label">Day</string>
     <string name="lunar_month_label">Lunar Month</string>
     <string name="lunar_day_label">Lunar Day</string>
     <string name="original_solar_date">Original Solar Date</string>

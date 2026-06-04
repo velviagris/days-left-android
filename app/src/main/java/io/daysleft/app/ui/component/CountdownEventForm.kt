@@ -50,9 +50,9 @@ fun CountdownEventForm(
     title: String, onTitleChange: (String) -> Unit,
     targetDate: LocalDate, onTargetDateChange: (LocalDate) -> Unit,
     isLunar: Boolean, onIsLunarChange: (Boolean) -> Unit,
-    isLunarWithoutYear: Boolean, onIsLunarWithoutYearChange: (Boolean) -> Unit,
-    lunarMonth: Int, onLunarMonthChange: (Int) -> Unit,
-    lunarDay: Int, onLunarDayChange: (Int) -> Unit,
+    isWithoutYear: Boolean, onIsWithoutYearChange: (Boolean) -> Unit,
+    selectedMonth: Int, onSelectedMonthChange: (Int) -> Unit,
+    selectedDay: Int, onSelectedDayChange: (Int) -> Unit,
     isRepeatEnabled: Boolean, onRepeatEnabledChange: (Boolean) -> Unit,
     repeatInterval: String, onRepeatIntervalChange: (String) -> Unit,
     notifyDaysInAdvance: Float, onNotifyDaysChange: (Float) -> Unit,
@@ -66,6 +66,22 @@ fun CountdownEventForm(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+
+    val solarMonths = remember {
+        (1..12).map { month ->
+            LocalDate.of(2000, month, 1).format(DateTimeFormatter.ofPattern("LLLL", Locale.getDefault()))
+        }.toTypedArray()
+    }
+    val solarDays = remember(selectedMonth) {
+        val maxDays = try {
+            YearMonth.of(2000, selectedMonth).lengthOfMonth()
+        } catch (e: Exception) {
+            31
+        }
+        (1..maxDays).map { day ->
+            if (Locale.getDefault().language == "zh") "${day}日" else "$day"
+        }.toTypedArray()
+    }
 
     Column(
         modifier = modifier
@@ -86,7 +102,7 @@ fun CountdownEventForm(
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             SegmentedButton(
                 selected = !isLunar,
-                onClick = { onIsLunarChange(false); onIsLunarWithoutYearChange(false) },
+                onClick = { onIsLunarChange(false) },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
             ) { Text(stringResource(R.string.solar)) }
             SegmentedButton(
@@ -96,31 +112,46 @@ fun CountdownEventForm(
             ) { Text(stringResource(R.string.lunar)) }
         }
 
-        // 3. 农历二级选项
-        if (isLunar) {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = !isLunarWithoutYear,
-                    onClick = { onIsLunarWithoutYearChange(false) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                ) { Text(stringResource(R.string.by_year), style = MaterialTheme.typography.labelMedium) }
-                SegmentedButton(
-                    selected = isLunarWithoutYear,
-                    onClick = {
-                        onIsLunarWithoutYearChange(true)
-                        onRepeatEnabledChange(true)
-                        onRepeatIntervalChange("YEARLY")
-                    },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                ) { Text(stringResource(R.string.by_month_day), style = MaterialTheme.typography.labelMedium) }
-            }
+        // 3. 子模式选项 (年月日 vs 月日)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            SegmentedButton(
+                selected = !isWithoutYear,
+                onClick = { onIsWithoutYearChange(false) },
+                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+            ) { Text(stringResource(R.string.by_year), style = MaterialTheme.typography.labelMedium) }
+            SegmentedButton(
+                selected = isWithoutYear,
+                onClick = {
+                    onIsWithoutYearChange(true)
+                    onRepeatEnabledChange(true)
+                    onRepeatIntervalChange("YEARLY")
+                },
+                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+            ) { Text(stringResource(R.string.by_month_day), style = MaterialTheme.typography.labelMedium) }
         }
 
         // 4. 日期/月日选择
-        if (isLunar && isLunarWithoutYear) {
+        if (isWithoutYear) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                LunarDropdown(label = stringResource(R.string.lunar_month_label), options = lunarMonths, selectedIndex = lunarMonth - 1, onSelect = { onLunarMonthChange(it + 1) }, modifier = Modifier.weight(1f))
-                LunarDropdown(label = stringResource(R.string.lunar_day_label), options = lunarDays, selectedIndex = lunarDay - 1, onSelect = { onLunarDayChange(it + 1) }, modifier = Modifier.weight(1f))
+                val monthsOptions = if (isLunar) lunarMonths else solarMonths
+                val daysOptions = if (isLunar) lunarDays else solarDays
+                val safeMonthIndex = (selectedMonth - 1).coerceIn(0, monthsOptions.lastIndex)
+                val safeDayIndex = (selectedDay - 1).coerceIn(0, daysOptions.lastIndex)
+
+                LunarDropdown(
+                    label = if (isLunar) stringResource(R.string.lunar_month_label) else stringResource(R.string.month_label),
+                    options = monthsOptions,
+                    selectedIndex = safeMonthIndex,
+                    onSelect = { onSelectedMonthChange(it + 1) },
+                    modifier = Modifier.weight(1f)
+                )
+                LunarDropdown(
+                    label = if (isLunar) stringResource(R.string.lunar_day_label) else stringResource(R.string.day_label),
+                    options = daysOptions,
+                    selectedIndex = safeDayIndex,
+                    onSelect = { onSelectedDayChange(it + 1) },
+                    modifier = Modifier.weight(1f)
+                )
             }
         } else {
             val solarDateStr = targetDate.format(DateTimeFormatter.ofPattern(stringResource(R.string.date_format_full)))
@@ -144,7 +175,7 @@ fun CountdownEventForm(
         }
 
         // 5. 重复与通知 (Slider/Switch)
-        val forceRepeat = isLunar && isLunarWithoutYear
+        val forceRepeat = isWithoutYear
         ListItem(
             headlineContent = { Text(stringResource(R.string.enable_repeat)) },
             trailingContent = { Switch(checked = if (forceRepeat) true else isRepeatEnabled, onCheckedChange = onRepeatEnabledChange, enabled = !forceRepeat) }
@@ -569,9 +600,9 @@ fun FormPreview() {
             title = "示例文案", onTitleChange = {},
             targetDate = LocalDate.now(), onTargetDateChange = {},
             isLunar = true, onIsLunarChange = {},
-            isLunarWithoutYear = true, onIsLunarWithoutYearChange = {},
-            lunarMonth = 1, onLunarMonthChange = {},
-            lunarDay = 1, onLunarDayChange = {},
+            isWithoutYear = true, onIsWithoutYearChange = {},
+            selectedMonth = 1, onSelectedMonthChange = {},
+            selectedDay = 1, onSelectedDayChange = {},
             isRepeatEnabled = true, onRepeatEnabledChange = {},
             repeatInterval = "YEARLY", onRepeatIntervalChange = {},
             notifyDaysInAdvance = 5f, onNotifyDaysChange = {},

@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -196,10 +197,15 @@ fun CountdownEventCard(event: CountdownEventEntity,onClick: () -> Unit) {
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier.padding(start = 16.dp)
             ) {
+                val years = DateUtils.calculateEventYears(event, nextDate)
                 if (isPast && event.isRepeatEnabled) {
                     // 如果已过但有重复循环，展示距离下一次的天数
                     Text("${nextDaysDiff}", style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Black)
-                    Text(stringResource(R.string.days_until_next), style = MaterialTheme.typography.labelLarge)
+                    if (years > 0) {
+                        Text(stringResource(R.string.days_until_years, years), style = MaterialTheme.typography.labelLarge)
+                    } else {
+                        Text(stringResource(R.string.days_until_next), style = MaterialTheme.typography.labelLarge)
+                    }
                 } else {
                     // 常规显示
                     Text(if (initialDaysDiff == 0L) stringResource(R.string.today_label) else absDays.toString(), style = MaterialTheme.typography.displayMedium)
@@ -214,17 +220,21 @@ fun CountdownEventCard(event: CountdownEventEntity,onClick: () -> Unit) {
  * 自定义圆角小标签组件
  */
 @Composable
-fun EventTag(text: String) {
+fun EventTag(
+    text: String,
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer
+) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f))
+            .background(containerColor)
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = contentColor
         )
     }
 }

@@ -9,6 +9,8 @@ import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
 import io.daysleft.app.R
 import io.daysleft.app.data.local.CountdownEventEntity
+import io.daysleft.app.data.local.RepeatInterval
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.TimeZone
 
@@ -18,7 +20,7 @@ class CalendarSyncManager(private val context: Context) {
      * 将倒数日事件同步到系统日历 (全天事件)
      * @return 返回系统日历中生成的 Event ID，如果失败或无权限则返回 null
      */
-    fun syncToCalendar(event: CountdownEventEntity): Long? {
+    fun syncToCalendar(event: CountdownEventEntity, forceNextOccurrence: Boolean = false): Long? {
         // 检查是否有写入日历的权限
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             return null
@@ -26,18 +28,45 @@ class CalendarSyncManager(private val context: Context) {
 
         val calId = getPrimaryCalendarId() ?: return null
 
+        val baseDate = if (event.isLunar) {
+            if (forceNextOccurrence) {
+                DateUtils.calculateNextOccurrence(event, LocalDate.now().plusDays(1))
+            } else {
+                DateUtils.calculateNextOccurrence(event)
+            }
+        } else {
+            event.targetDate
+        }
+
+        val startMillis = baseDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+
         val values = ContentValues().apply {
             put(CalendarContract.Events.TITLE, context.getString(R.string.calendar_event_prefix, event.title))
             put(CalendarContract.Events.DESCRIPTION, context.getString(R.string.calendar_event_desc))
             put(CalendarContract.Events.CALENDAR_ID, calId)
-
-            // 恢复为全天事件
-            val startMillis = event.targetDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
-            val endMillis = startMillis + 24 * 60 * 60 * 1000
             put(CalendarContract.Events.DTSTART, startMillis)
-            put(CalendarContract.Events.DTEND, endMillis)
             put(CalendarContract.Events.EVENT_TIMEZONE, "UTC")
             put(CalendarContract.Events.ALL_DAY, 1)
+
+            // 如果是公历重复事件，写入 RRULE，且必须用 DURATION 代替 DTEND
+            val isRecurringSolar = event.isRepeatEnabled && !event.isLunar
+            if (isRecurringSolar) {
+                val rrule = when (event.repeatInterval) {
+                    RepeatInterval.DAILY -> "FREQ=DAILY"
+                    RepeatInterval.WEEKLY -> "FREQ=WEEKLY"
+                    RepeatInterval.MONTHLY -> "FREQ=MONTHLY"
+                    RepeatInterval.YEARLY -> "FREQ=YEARLY"
+                    null -> null
+                }
+                rrule?.let {
+                    put(CalendarContract.Events.RRULE, it)
+                    put(CalendarContract.Events.DURATION, "P1D") // 全天事件持续时间为 1 天 (P1D)
+                }
+            } else {
+                // 非重复事件或农历事件（农历目前不支持系统自带的 RRULE），使用具体的 DTEND
+                val endMillis = startMillis + 24 * 60 * 60 * 1000
+                put(CalendarContract.Events.DTEND, endMillis)
+            }
         }
 
         // 插入事件并获取 URI

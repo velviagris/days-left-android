@@ -57,6 +57,7 @@ object BackupUtils {
                 val syncToSystemCalendar = obj.get("syncToSystemCalendar")?.asBoolean ?: false
                 val useCalendarNotification = obj.get("useCalendarNotification")?.asBoolean ?: false
                 val calendarEventId = obj.get("calendarEventId")?.asLong
+                val isWithoutYear = obj.get("isWithoutYear")?.asBoolean ?: lunarInfo.isLunarWithoutYear
                 
                 CountdownEventEntity(
                     id = id,
@@ -69,7 +70,8 @@ object BackupUtils {
                     notifyTimeMinute = notifyTimeMinute,
                     syncToSystemCalendar = syncToSystemCalendar,
                     useCalendarNotification = useCalendarNotification,
-                    calendarEventId = calendarEventId
+                    calendarEventId = calendarEventId,
+                    isWithoutYear = isWithoutYear
                 )
             }
         )

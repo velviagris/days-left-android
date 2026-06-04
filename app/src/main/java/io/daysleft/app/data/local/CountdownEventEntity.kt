@@ -39,7 +39,10 @@ data class CountdownEventEntity(
     @ColumnInfo(defaultValue = "0")
     val useCalendarNotification: Boolean = false,
     
-    val calendarEventId: Long?
+    val calendarEventId: Long?,
+
+    @ColumnInfo(defaultValue = "0")
+    val isWithoutYear: Boolean = false
 ) {
     val isRepeatEnabled: Boolean
         @Ignore get() = repeatInterval != null

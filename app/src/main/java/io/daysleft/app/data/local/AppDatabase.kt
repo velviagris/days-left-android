@@ -11,7 +11,7 @@ import androidx.room.TypeConverters
  */
 @Database(
     entities = [CountdownEventEntity::class],
-    version = 6,
+    version = 7,
     exportSchema = false // 在生产环境中，建议开启 schema 导出以便追踪数据库版本变更
 )
 @TypeConverters(Converters::class) // 注册我们之前编写的类型转换器

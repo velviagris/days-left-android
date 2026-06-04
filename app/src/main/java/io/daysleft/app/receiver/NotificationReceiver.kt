@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import io.daysleft.app.R
 import io.daysleft.app.data.local.AppDatabase
 import io.daysleft.app.util.AlarmScheduler
+import io.daysleft.app.util.CalendarSyncManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -80,6 +81,18 @@ class NotificationReceiver : BroadcastReceiver() {
                 if (event != null && event.isRepeatEnabled) {
                     val alarmScheduler = AlarmScheduler(context)
                     alarmScheduler.scheduleAlarm(event)
+
+                    // 如果是农历重复事件，且开启了系统日历同步，并且是“当日提醒”（daysLeft == 0），
+                    // 则自动更新系统日历至下一个发生的日期，并将新的 calendarEventId 写入数据库。
+                    if (event.syncToSystemCalendar && event.isLunar && daysLeft == 0) {
+                        val calendarSyncManager = CalendarSyncManager(context)
+                        // 1. 从系统日历中删除旧事件
+                        event.calendarEventId?.let { calendarSyncManager.deleteFromCalendar(it) }
+                        // 2. 创建下一年发生的新事件并写入
+                        val newCalId = calendarSyncManager.syncToCalendar(event, forceNextOccurrence = true)
+                        // 3. 更新数据库中对应的 calendarEventId
+                        db.countdownEventDao.updateEvent(event.copy(calendarEventId = newCalId))
+                    }
                 }
             } finally {
                 // 必须调用 finish 释放系统资源

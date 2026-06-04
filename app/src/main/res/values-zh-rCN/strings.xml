@@ -59,8 +59,11 @@
     <string name="event_title_placeholder">例如：跨年夜、父母生日</string>
     <string name="solar">公历</string>
     <string name="lunar">农历</string>
-    <string name="by_year">年份推算</string>
-    <string name="by_month_day">指定月日</string>
+    <string name="by_year">年月日</string>
+    <string name="by_month_day">月日</string>
+    <string name="days_until_years">距%d年还有</string>
+    <string name="month_label">月份</string>
+    <string name="day_label">日期</string>
     <string name="lunar_month_label">农历月</string>
     <string name="lunar_day_label">农历日</string>
     <string name="original_solar_date">原始公历日期</string>
