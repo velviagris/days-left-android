@@ -49,13 +49,13 @@ android {
         includeInBundle = false
     }
 
-//    packaging {
-//        resources {
-//            // 排除基准配置文件，解决 F-Droid 重复构建编译不一致的问题
-//            excludes += "assets/dexopt/baseline.prof"
-//            excludes += "assets/dexopt/baseline.profm"
-//        }
-//    }
+    packaging {
+        resources {
+            // 排除基准配置文件，解决 F-Droid 重复构建编译不一致的问题
+            excludes += "assets/dexopt/baseline.prof"
+            excludes += "assets/dexopt/baseline.profm"
+        }
+    }
 }
 
 dependencies {
