@@ -13,4 +13,5 @@ sealed class Screen(val route: String, @StringRes val titleResId: Int, val icon:
     object Settings : Screen("settings", R.string.nav_settings, Icons.Filled.Settings)
     object Create : Screen("create", R.string.add_event) // Create 不需要底部图标
     object Edit : Screen("edit/{eventId}", R.string.edit_details) // Edit 不需要底部图标
+    object Info : Screen("info/{eventId}", R.string.event_details) // Info 不需要底部图标
 }

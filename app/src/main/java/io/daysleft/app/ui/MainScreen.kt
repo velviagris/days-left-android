@@ -13,10 +13,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import io.daysleft.app.ui.navigation.Screen
 import io.daysleft.app.ui.screen.CreateBottomSheet
-import io.daysleft.app.ui.screen.EditBottomSheet
+import io.daysleft.app.ui.screen.EditScreen
 import io.daysleft.app.ui.screen.HomeScreen
+import io.daysleft.app.ui.screen.InfoScreen
 import io.daysleft.app.ui.screen.SettingsScreen
 import io.daysleft.app.ui.viewmodel.CountdownViewModel
 
@@ -29,7 +32,6 @@ fun MainScreen(viewModel: CountdownViewModel) {
 
     // 1. 控制 BottomSheet 显示的状态
     var showCreateSheet by remember { mutableStateOf(false) }
-    var editingEventId by remember { mutableStateOf<Long?>(null) }
 
     // 2. 底部导航项定义
     val bottomNavItems = listOf(
@@ -41,28 +43,34 @@ fun MainScreen(viewModel: CountdownViewModel) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    // 判断底部栏是否显示：仅在 Home 和 Settings 页面显示
+    val isBottomBarVisible = currentDestination?.route == Screen.Home.route || 
+            currentDestination?.route == Screen.Settings.route
+
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                bottomNavItems.forEach { screen ->
-                    val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                    NavigationBarItem(
-                        icon = {
-                            screen.icon?.let { Icon(it, contentDescription = stringResource(screen.titleResId)) }
-                        },
-                        label = { Text(stringResource(screen.titleResId)) },
-                        selected = isSelected,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                // 避免在返回栈中积累多个目标页面的实例
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (isBottomBarVisible) {
+                NavigationBar {
+                    bottomNavItems.forEach { screen ->
+                        val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                        NavigationBarItem(
+                            icon = {
+                                screen.icon?.let { Icon(it, contentDescription = stringResource(screen.titleResId)) }
+                            },
+                            label = { Text(stringResource(screen.titleResId)) },
+                            selected = isSelected,
+                            onClick = {
+                                navController.navigate(screen.route) {
+                                    // 避免在返回栈中积累多个目标页面的实例
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         },
@@ -79,7 +87,7 @@ fun MainScreen(viewModel: CountdownViewModel) {
             }
         }
     ) { innerPadding ->
-        // 3. 页面内容区域 (仅保留 Home 和 Settings)
+        // 3. 页面内容区域 (包含 Home, Settings, Info, Edit)
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
@@ -89,12 +97,38 @@ fun MainScreen(viewModel: CountdownViewModel) {
                 HomeScreen(
                     viewModel = viewModel,
                     onNavigateToEdit = { eventId ->
-                        editingEventId = eventId
+                        navController.navigate("info/$eventId")
                     }
                 )
             }
             composable(Screen.Settings.route) {
                 SettingsScreen(viewModel = viewModel)
+            }
+            composable(
+                route = Screen.Info.route,
+                arguments = listOf(navArgument("eventId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val eventId = backStackEntry.arguments?.getLong("eventId") ?: -1L
+                InfoScreen(
+                    eventId = eventId,
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToEdit = { id -> navController.navigate("edit/$id") }
+                )
+            }
+            composable(
+                route = Screen.Edit.route,
+                arguments = listOf(navArgument("eventId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val eventId = backStackEntry.arguments?.getLong("eventId") ?: -1L
+                EditScreen(
+                    eventId = eventId,
+                    viewModel = viewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onEventDeleted = {
+                        navController.popBackStack(Screen.Home.route, false)
+                    }
+                )
             }
         }
 
@@ -105,15 +139,6 @@ fun MainScreen(viewModel: CountdownViewModel) {
             CreateBottomSheet(
                 viewModel = viewModel,
                 onDismiss = { showCreateSheet = false }
-            )
-        }
-
-        // 编辑倒数日半屏
-        editingEventId?.let { eventId ->
-            EditBottomSheet(
-                eventId = eventId,
-                viewModel = viewModel,
-                onDismiss = { editingEventId = null }
             )
         }
     }

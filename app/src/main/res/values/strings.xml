@@ -95,4 +95,11 @@
     <string name="lunar_month_suffix"> Month</string>
     <string name="nav_home">Home</string>
     <string name="nav_settings">Settings</string>
+    <string name="event_details">Details</string>
+    <string name="share">Share</string>
+    <string name="save_success">Saved to gallery successfully!</string>
+    <string name="save_to_gallery">Save to Gallery</string>
+    <string name="share_preview_title">Share Preview</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>

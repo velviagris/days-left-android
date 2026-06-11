@@ -95,4 +95,11 @@
     <string name="lunar_month_suffix">月</string>
     <string name="nav_home">首頁</string>
     <string name="nav_settings">設定</string>
+    <string name="event_details">詳情</string>
+    <string name="share">分享</string>
+    <string name="save_success">圖片已保存至相冊！</string>
+    <string name="save_to_gallery">保存到相冊</string>
+    <string name="share_preview_title">分享預覽</string>
+    <string name="theme_light">亮色</string>
+    <string name="theme_dark">暗色</string>
 </resources>
