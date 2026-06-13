@@ -102,4 +102,6 @@
     <string name="share_preview_title">分享预览</string>
     <string name="theme_light">亮色</string>
     <string name="theme_dark">暗色</string>
+    <string name="permission_granted_retry">已获得存储权限，请重新点击保存</string>
+    <string name="permission_denied_store">需要存储权限才能保存图片</string>
 </resources>

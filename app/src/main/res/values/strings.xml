@@ -102,4 +102,6 @@
     <string name="share_preview_title">Share Preview</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="permission_granted_retry">Permission granted, please click Save again</string>
+    <string name="permission_denied_store">Storage permission is required to save the image</string>
 </resources>

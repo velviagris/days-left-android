@@ -3,12 +3,16 @@ package io.daysleft.app.ui.screen
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -374,6 +378,16 @@ fun SharePreviewDialog(
     val systemDark = isSystemInDarkTheme()
     var isDarkPreview by remember(systemDark) { mutableStateOf(systemDark) }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Toast.makeText(context, context.getString(R.string.permission_granted_retry), Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, context.getString(R.string.permission_denied_store), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             shape = RoundedCornerShape(28.dp),
@@ -443,20 +457,30 @@ fun SharePreviewDialog(
                     }
                     Button(
                         onClick = {
-                            coroutineScope.launch {
-                                try {
-                                    val imageBitmap = graphicsLayer.toImageBitmap()
-                                    val bitmap = imageBitmap.asAndroidBitmap()
-                                    val softwareBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
-                                        bitmap.copy(Bitmap.Config.ARGB_8888, false)
-                                    } else {
-                                        bitmap
+                            val hasPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ||
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                    ) == PackageManager.PERMISSION_GRANTED
+
+                            if (hasPermission) {
+                                coroutineScope.launch {
+                                    try {
+                                        val imageBitmap = graphicsLayer.toImageBitmap()
+                                        val bitmap = imageBitmap.asAndroidBitmap()
+                                        val softwareBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                                            bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        } else {
+                                            bitmap
+                                        }
+                                        saveBitmapToGallery(context, softwareBitmap)
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        Toast.makeText(context, "Save failed: ${e.message}", Toast.LENGTH_SHORT).show()
                                     }
-                                    saveBitmapToGallery(context, softwareBitmap)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                    Toast.makeText(context, "Save failed: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
+                            } else {
+                                permissionLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             }
                         },
                         modifier = Modifier.weight(1.5f),

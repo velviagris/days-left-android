@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "io.daysleft.app"
-        minSdk = 33
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "0.5.0"

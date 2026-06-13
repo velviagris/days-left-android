@@ -102,4 +102,6 @@
     <string name="share_preview_title">分享預覽</string>
     <string name="theme_light">亮色</string>
     <string name="theme_dark">暗色</string>
+    <string name="permission_granted_retry">已獲得儲存權限，請重新點擊儲存</string>
+    <string name="permission_denied_store">需要儲存權限才能儲存圖片</string>
 </resources>
